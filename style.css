@@ -119,3 +119,12 @@ button { transition: all 160ms ease; } /* SENSE motion: 200ms-ish ease-out, feel
 .budget-line { font-size: 10px; color: var(--dim); }
 .last-delivery { font-size: 10px; color: #8fbf7f; margin: 4px 0 2px; }
 .ad-card button[disabled] { opacity: 0.5; cursor: default; border-color: #3a3124; }
+
+.aud-preview { background: #12100d; border: 1px solid #3a3124; border-left: 3px solid var(--gold); border-radius: 6px; padding: 10px; margin: -2px 0 8px; font-size: 11px; line-height: 1.6; }
+.aud-preview:empty { display: none; }
+.aud-preview-head { color: var(--gold); margin-bottom: 3px; }
+.aud-preview-head b { color: var(--text); }
+.aud-preview-row { color: var(--dim); }
+.aud-preview-row b { color: var(--text); }
+.aud-preview-proj { color: #d4b98a; margin-top: 3px; }
+.aud-preview-tip { color: #e0a05e; margin-top: 4px; font-size: 10px; }

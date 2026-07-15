@@ -484,10 +484,31 @@ function createAd() {
   showInventory();
 }
 
+// Live audience preview as the advertiser types targeting — instant proof that
+// targeting maps to a real, changing audience (reach/relevance/CPM).
+function previewAudience() {
+  const el = document.getElementById('audience-preview');
+  if (!el) return;
+  const target = (document.getElementById('target') && document.getElementById('target').value) || '';
+  const budget = parseInt(document.getElementById('budget') && document.getElementById('budget').value) || 500;
+  const surprise = (window._p16Voice && window._p16Voice.surprise) || 0.4;
+  if (!target.trim()) { el.innerHTML = ''; return; }
+  const est = estimateAudience(target, surprise);
+  const projImps = Math.floor((budget / Math.max(1, est.cpm)) * 1000);
+  const relColor = est.relevance >= 0.7 ? '#8fbf7f' : est.relevance >= 0.45 ? '#d4b98a' : '#e0a05e';
+  el.innerHTML = `
+    <div class="aud-preview-head">🎯 Matched: <b>${est.segments.join(' + ')}</b></div>
+    <div class="aud-preview-row">Reach <b>${est.reach.toLocaleString()}</b> · Relevance <b style="color:${relColor}">${(est.relevance*100).toFixed(0)}%</b> · CPM <b>${est.cpm}</b> · CTR <b>${(est.ctr*100).toFixed(2)}%</b></div>
+    <div class="aud-preview-proj">Budget ${budget} → ~${projImps.toLocaleString()} projected impressions</div>
+    ${est.segmentKeys.includes('general') ? '<div class="aud-preview-tip">Broad match — add specific interests (Web3, Beauty, Gaming…) to lift relevance.</div>' : est.segments.length > 3 ? '<div class="aud-preview-tip">Wide spread lowers relevance — focus on 1–3 segments for stronger CTR.</div>' : ''}
+  `;
+}
+
 function showCreate() {
   hideAll();
   document.getElementById('create').classList.remove('hidden');
   showAdultOption(); // show Eros option if unlocked
+  previewAudience();
 }
 function showMetaverse() { hideAll(); document.getElementById('metaverse').classList.remove('hidden'); }
 function showIdeas() { hideAll(); document.getElementById('ideas').classList.remove('hidden'); }
@@ -988,18 +1009,61 @@ function analyzeAdPerformanceWithVoice(adId) {
     rec.ondataavailable=e=>chunks.push(e.data);
     rec.onstop=()=>{
       const s=(window.getP6LungSurprise&&window.getP6LungSurprise())||(0.42+Math.random()*0.48);
-      const perf = (ad.impressions/Math.max(1,ad.budget))*s;
-      const verdict = s>0.66?'high resonance — scale creative':s>0.42?'sfumato steady — nurture':'ache mirror — pivot';
-      const txt=`p6 Analyst: ${verdict}. Score ${perf.toFixed(1)} (surprise ${s.toFixed(2)})`;
-      if(el) el.innerHTML=txt;
-      addToCodex(`Voice analysis • ${ad.title}: ${verdict}`);
-      ad.voiceAnalysis={surprise:s, perf:perf.toFixed(1), verdict, ts:Date.now()};
+      const rep = buildPerformanceReport(ad); // REAL data-driven report
+      if(el) el.innerHTML = `<div style="font-size:11px">${rep.html}<br><span style="color:#c5a46e">👁 p6 voice resonance ${s.toFixed(2)} layered on the data above.</span></div>`;
+      addToCodex(`Perf report • ${ad.title}: ${rep.verdict} — CTR ${(rep.ctr*100).toFixed(2)}% vs bench ${(rep.benchmark*100).toFixed(2)}%, CPC ${rep.cpc}, ${rep.reachPct}% reach used.`);
+      ad.voiceAnalysis={surprise:s, verdict:rep.verdict, ctr:rep.ctr, cpc:rep.cpc, ts:Date.now()};
       localStorage.setItem('p16_ads',JSON.stringify(ads));
       birthVoiceSeed('analysis',s,ad.id);
       stream.getTracks().forEach(t=>t.stop());
     };
     rec.start(); setTimeout(()=>rec.stop(),3600);
-  }).catch(()=>{ if(el)el.innerHTML='p6 Analyst: breath echo logged.'; birthVoiceSeed('analysis',0.54,adId); });
+  }).catch(()=>{
+    const rep = buildPerformanceReport(ad); // real report works without mic
+    if(el) el.innerHTML = `<div style="font-size:11px">${rep.html}</div>`;
+    addToCodex(`Perf report • ${ad.title}: ${rep.verdict} (CTR ${(rep.ctr*100).toFixed(2)}%).`);
+    ad.voiceAnalysis={verdict:rep.verdict, ctr:rep.ctr, cpc:rep.cpc, ts:Date.now()};
+    localStorage.setItem('p16_ads',JSON.stringify(ads));
+    birthVoiceSeed('analysis',0.54,adId);
+  });
+}
+
+// REAL performance analysis grounded in delivered numbers vs segment benchmark.
+// CTR vs benchmark, CPC, reach saturation, and an actionable recommendation.
+function buildPerformanceReport(ad) {
+  const est = ad.audience || estimateAudience(ad.target, ad.surprise || 0.4);
+  const imps = ad.impressions || 0;
+  const clicks = ad.clicks || 0;
+  const spent = ad.spent || 0;
+  const ctr = imps > 0 ? clicks / imps : 0;
+  const benchmark = est.ctr; // the segment's expected CTR = fair benchmark
+  const cpc = clicks > 0 ? +(spent / clicks).toFixed(2) : null;
+  const cpm = imps > 0 ? +((spent / imps) * 1000).toFixed(2) : est.cpm;
+  const reachPct = est.reach > 0 ? Math.min(100, Math.round((imps / (est.reach * 3)) * 100)) : 0;
+  const budgetLeft = Math.max(0, (ad.budget || 0) - spent);
+
+  // Actionable verdict from the real ratio of realized CTR to benchmark.
+  let verdict, rec;
+  if (imps === 0) {
+    verdict = 'Not delivered yet';
+    rec = 'Hit "Deliver" to spend budget and generate real performance data.';
+  } else {
+    const ratio = benchmark > 0 ? ctr / benchmark : 1;
+    if (ratio >= 1.15) { verdict = 'Over-performing'; rec = 'CTR beats the segment benchmark — scale budget on this exact targeting.'; }
+    else if (ratio >= 0.85) { verdict = 'On benchmark'; rec = 'Performing as expected. Test a tighter segment or stronger voice creative to lift CTR.'; }
+    else { verdict = 'Under-performing'; rec = 'CTR below benchmark — narrow targeting or refresh the creative before spending more.'; }
+    if (reachPct >= 90) rec = 'Audience saturated (frequency cap) — widen targeting to reach new users instead of repeating.';
+    else if (budgetLeft < 0.5) rec = verdict === 'Over-performing' ? 'Budget spent and it beat benchmark — clone this ad with a bigger budget.' : rec;
+  }
+
+  const html =
+    `<b>${verdict}</b> · ${imps.toLocaleString()} imps · ${clicks.toLocaleString()} clicks<br>` +
+    `CTR <b>${(ctr*100).toFixed(2)}%</b> vs benchmark ${(benchmark*100).toFixed(2)}%` +
+    (cpc != null ? ` · CPC ${cpc}` : '') + ` · CPM ${cpm}<br>` +
+    `Reach used: ${reachPct}% of ${est.reach.toLocaleString()} (${est.segments.join(', ')})<br>` +
+    `<span style="color:#8fbf7f">→ ${rec}</span>`;
+
+  return { verdict, ctr, benchmark, cpc, cpm, reachPct, rec, html };
 }
 
 function p6VoiceExpertInsight(surprise){
