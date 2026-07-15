@@ -1,0 +1,75 @@
+/* p16 AdForge — Da Vinci SENSE + Web3 + Legion (Sfumato • Vitruvian 0.618 • Restraint) */
+:root {
+  --bg: #0a0806;
+  --gold: #c5a46e;
+  --card: #12100d;
+  --text: #f5f1e6;
+  --dim: #8b6f47;
+  --accent: #a78bfa;
+}
+
+body { background: var(--bg); color: var(--text); font-family: system-ui,-apple-system,sans-serif; margin:0; padding:0; line-height:1.58; }
+.container { max-width:618px; margin:0 auto; padding:calc(var(--grid,8px)*2); } /* golden SENSE */
+header { text-align:center; margin-bottom:calc(var(--grid,8px)*2); }
+h1 { font-size:24px; color:var(--gold); letter-spacing:-0.6px; }
+.tagline { color:var(--dim); font-size:13px; }
+.disclaimer { font-size:8.5px; opacity:0.55; background:#111; padding:5px 9px; border-radius:3px; }
+.wallet { display:flex; gap:calc(var(--grid,8px)); justify-content:center; margin:10px 0; }
+#wallet-info { font-family:monospace; font-size:10px; background:var(--card); padding:4px 7px; border-radius:4px; border:1px solid #3a2f22; }
+button { background:#15120f; color:var(--gold); border:1px solid #3a2f22; padding:7px 11px; border-radius:5px; font-size:11px; cursor:pointer; }
+button.primary { background:var(--gold); color:#0a0806; font-weight:600; }
+.card { background:#12100d; padding:9px; border-radius:6px; border:1px solid #3a2f22; margin:8px 0; }
+main { max-width:618px; margin:0 auto; }
+
+.nav { display: flex; gap: 6px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+button { background: var(--card); color: var(--gold); border: 1px solid #3a3124; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.1s; }
+button.primary { background: var(--gold); color: #0a0806; font-weight: 600; }
+button:hover { border-color: var(--gold); }
+
+.section { margin-bottom: 24px; }
+.hidden { display: none; }
+
+.form label { display: block; font-size: 12px; color: var(--dim); margin: 12px 0 4px; }
+.form input, .form textarea { width: 100%; background: #1a1712; border: 1px solid #3a3124; color: var(--text); padding: 10px; border-radius: 6px; margin-bottom: 8px; box-sizing: border-box; }
+.form textarea { height: 80px; }
+
+.grid { display: grid; gap: 10px; }
+.ad-card { background: var(--card); border: 1px solid #3a3124; padding: 14px; border-radius: 8px; }
+.ad-card .surprise { color: #f5d76e; font-size: 11px; }
+.ad-card button { margin-top: 8px; width: 100%; }
+
+.fomo { color: #f87171; font-size: 11px; font-weight: 600; }
+
+.notebook-entry { background: var(--card); border: 1px solid #3a3124; padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
+
+/* p6 Voice Expert UI — SENSE + Da Vinci */
+.voice-meter { background:#12100d; border:1px solid #3a3124; padding:8px; border-radius:6px; margin:10px 0; font-size:12px; }
+.voice-meter .bar { background:#3a3124; height:5px; border-radius:3px; overflow:hidden; }
+.voice-meter .bar > div { background:#c5a46e; height:100%; transition:width .2s ease; }
+
+#voice-preview, #voiceforge-preview, #analyst-preview { background:#12100d; padding:8px; border-radius:6px; margin:6px 0; font-size:12px; border:1px solid #3a3124; }
+
+button { transition: all 80ms ease; }
+button:hover { border-color:#c5a46e; }
+
+.lilith { font-size:0.5em; opacity:0.6; } /* keep if present */
+
+.age-gate { background: #1a1108; border: 2px solid #f87171; padding: 16px; border-radius: 8px; text-align: center; margin: 12px 0; }
+.sub-panel { background: var(--card); border: 1px solid var(--gold); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 13px; }
+
+/* === LILITH PSYCH + FULL-CHEAT SENSE (elegant, restrained, 60/30/10 gold, one protagonist) === */
+.lilith { font-size: 13px; color: var(--gold); font-weight: 500; letter-spacing: 0.5px; opacity: 0.95; }
+.psych-panel { background: var(--card); border: 1px solid #3a3124; padding: 14px; border-radius: 8px; margin-bottom: 14px; }
+.psych-stat { margin: 7px 0; font-size: 13px; line-height: 1.4; padding-left: 6px; }
+.psych-stat.near { color: #f5a35e; }
+.psych-stat.loss { color: #e06b6b; }
+
+.vault-card { border-color: #c5a46e; box-shadow: 0 0 0 1px rgba(197,164,110,0.2) inset; }
+.vault-card .fomo { color: #c5a46e; font-weight: 600; }
+
+#fomo-pulse, #var-ratio { border-left: 3px solid #c5a46e; }
+#near-miss { border-left: 3px solid #f5a35e; }
+#loss-avo { border-left: 3px solid #e06b6b; }
+#resonance { color: #d4b98a; font-weight: 600; }
+
+.note { font-size: 10px; color: var(--dim); margin-top: 8px; opacity: 0.85; }

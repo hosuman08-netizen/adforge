@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdForge • Web3 광고 플랫폼</title>
+  <meta name="description" content="p16 Web3 Ad Platform × p6 Voice Expert. Voice ads, voice-overs, voice analysis, p9 live voice cross. Fictional. Legion one.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="disclaimer">FICTIONAL SIMULATED WEB3 ADS • 18+ • NO REAL FUNDS/TOKENS/ADS • p16 Base/Solana on-chain auctions + NFT slots (sim) • p10 AdFuel Credits (virtual) • p9/p11 cross • All fees prominent + code-matched. Legion one.</div>
+      <h1>AdForge <span class="lilith">× Lilith Psych</span></h1>
+      <p class="tagline">p6 Voice Expert. Ad Creation • Voice-Overs • Performance Analysis • p9 Live Voice Ads. (Fictional Legion)</p>
+      
+      <div class="wallet">
+        <button onclick="connectWallet()">🔗 Connect Wallet</button>
+        <div id="wallet-info">0x... • 1,500 $EROS / 920 AdFuel (p10)</div>
+      </div>
+      
+      <div class="nav">
+        <button onclick="showCreate()">✍️ Create (p6 Voice)</button>
+        <button onclick="showInventory()">📦 Inventory</button>
+        <button onclick="showNFTSlots()">🪙 NFT Slots (ERC721)</button>
+        <button onclick="showAuctions()">🔨 On-Chain Auctions</button>
+        <button onclick="crossP9LiveAuction()">📡 p9 Live Cross</button>
+        <button onclick="crossP11Metaverse()">🗺 p11 Metaverse Cross</button>
+        <button onclick="showCodex()">📓 Codex</button>
+      </div>
+    </header>
+
+    <!-- Create Ad -->
+    <div id="create" class="section">
+      <h2>Create Web3 Ad</h2>
+      <div class="form">
+        <label>Ad Title</label>
+        <input id="ad-title" placeholder="New product launch">
+        
+        <label>Voice Creative — p6 Voice Expert (Lung Surprise Eye + Artistic Analysis)</label>
+        <button onclick="recordVoiceAd()">🎙 Record p6 Voice Ad</button>
+        <div id="voice-preview"></div>
+        <canvas id="voice-lung" width="300" height="60" style="border:1px solid #3a3124; display:none;"></canvas>
+        
+        <label>Ad Description / Script</label>
+        <textarea id="ad-desc" placeholder="Describe your offer..."></textarea>
+        
+        <label>Budget (Credits or $EROS)</label>
+        <input id="budget" type="number" value="500">
+        
+        <label>Target (p6 voice tags, p9 interests)</label>
+        <input id="target" placeholder="Beauty, Web3, Young adults">
+        
+        <div id="adult-option" style="display:none; margin:8px 0;">
+          <label><input type="checkbox" id="adult-ad"> Eros Veil (p8/p9 adult — 18+ only)</label>
+        </div>
+        
+        <button onclick="createAd()" class="primary">Create Ad (FOMO: limited slots)</button>
+      </div>
+    </div>
+
+    <!-- Inventory -->
+    <div id="inventory" class="section hidden">
+      <h2>Ad Inventory <span class="fomo">🔥 47 slots left • Trending</span></h2>
+      <div id="inventory-list" class="grid"></div>
+    </div>
+
+    <!-- Live Ads (p9 Voice Cross) -->
+    <div id="live" class="section hidden">
+      <h2>📡 p9 Live Voice Ads • p6 Artistic Lung</h2>
+      <div id="live-voice-list" class="grid"></div>
+      <button onclick="launchLiveVoiceAdCross()" class="primary">🚀 Birth Live Voice Ad (p6+p9)</button>
+      <button onclick="joinRandomLiveVoice()">Join Live Voice Auction</button>
+      <div id="live-voice-preview" style="margin-top:8px;font-size:12px;opacity:0.85"></div>
+      <small>Cross: p6 voice surprise powers live ad intensity + p9 eye ratings. Fictional.</small>
+    </div>
+
+    <!-- Publisher (p8/p9 integration) -->
+    <div id="publisher" class="section hidden">
+      <h2>🏪 Publisher Inventory (p8 Eden • p9 Eros) <span class="fomo">Earn while creators view • 12 slots active</span></h2>
+      <div class="form">
+        <label>Content Slot (from p8/p9)</label>
+        <input id="slot-title" placeholder="Eden Drop #47 banner" value="My p8 Voice Content Slot">
+        <label>Expected Imps / Rate</label>
+        <input id="slot-rate" value="2400 imps / 18 Credits">
+        <button onclick="listPublisherSlot()" class="primary">List Slot (FOMO: 8 left this cycle)</button>
+      </div>
+      <div id="publisher-slots"></div>
+      <div class="note">p12 idea ads auto-target here. Idle earnings simulate on load.</div>
+    </div>
+
+    <!-- Campaigns -->
+    <div id="campaigns" class="section hidden">
+      <h2>My Campaigns</h2>
+      <div id="my-campaigns"></div>
+    </div>
+
+    <!-- Codex -->
+    <div id="codex" class="section hidden">
+      <h2>📓 Ad Codex (ALWAYS LEARNING + p6 surprise mutations)</h2>
+      <div id="codex-list"></div>
+    </div>
+
+    <!-- Lilith Psych Dashboard (Lilith + Full-Cheat) -->
+    <div id="psych" class="section hidden">
+      <h2>🔥 Lilith Psych — Full-Cheat Hooks</h2>
+      <div class="psych-panel">
+        <div id="fomo-pulse" class="psych-stat">FOMO on Performance: <span id="fomo-val">87</span>% advertisers hitting 3x+ ROI — join now</div>
+        <div id="var-ratio" class="psych-stat">Variable Ratio Bids/Earnings: <span id="var-val">2.8x</span> surprise payout active</div>
+        <div id="near-miss" class="psych-stat near">Near-Miss Auctions: <span id="miss-val">You missed premium slot by 11 Credits. Next window open.</span></div>
+        <div id="loss-avo" class="psych-stat loss">Loss Aversion: <span id="loss-val">Missed 4.2x yesterday on similar. Your opportunity expires soon.</span></div>
+        <div id="resonance" class="psych-stat">p6 Voice Psych Resonance: <span id="res-val">0.00</span> — multiplies every hook (retention/virality)</div>
+      </div>
+      <button onclick="triggerPsychSurge()" class="primary">Ignite Psych Surge (Birth)</button>
+      <p class="note">Internal only. Fictional. All effects for advertiser/creator retention + virality. Prominent disclosure: no real value.</p>
+    </div>
+
+    <!-- Endowment Vault -->
+    <div id="vault" class="section hidden">
+      <h2>🏦 Endowment Vault — Your Owned Ad Slots</h2>
+      <div id="vault-list" class="grid"></div>
+      <button onclick="protectSlot()" style="margin-top:8px;">Protect My Slots (Endowment Lock)</button>
+      <button onclick="shareVictory()" class="primary" style="margin-top:8px;">Share p6 Victory Echo (Virality Birth)</button>
+      <p class="note">Endowment: once owned, these feel like yours. Strong loss aversion to let go. Births retention loops.</p>
+    </div>
+
+    <!-- Metaverse -->
+    <div id="metaverse" class="section hidden">
+      <h2>p11 Metaverse Ad Slots</h2>
+      <div id="meta-list" class="grid"></div>
+      <button onclick="seedFromMetaverse()">Seed Ad from Metaverse Billboard (Birth 1)</button>
+    </div>
+
+    <!-- Ideas -->
+    <div id="ideas" class="section hidden">
+      <h2>p12 Idea-Seeded Ads</h2>
+      <div id="idea-list" class="grid"></div>
+      <button onclick="spawnFromIdea()">Spawn Ad from p12 Idea (Birth 1)</button>
+    </div>
+
+    <!-- Subs -->
+    <div id="subs" class="section hidden">
+      <h2>💎 AdForge Subs (Monetization)</h2>
+      <div class="sub-panel">Creator Featured Pass — 12% fee → 7% • Priority slots • $4.99/mo (fictional)</div>
+      <button onclick="buySub('creator')">Buy Creator Pass</button>
+      <div class="sub-panel">Advertiser Forge Pass — lower bids + surprise boost • $9.99/mo</div>
+      <button onclick="buySub('advertiser')">Buy Advertiser Pass</button>
+      <div style="font-size:10px;opacity:0.6;margin-top:8px;">All fictional. 12% platform fee on spend via p10.</div>
+    </div>
+
+    <!-- Age Gate -->
+    <div id="age-gate" class="age-gate hidden">
+      <strong>18+ ONLY • FICTIONAL</strong><br>
+      This is artistic fictional content. No real interaction or funds.<br>
+      <button onclick="confirmAdult()">I am 18+ — Enter Eros Veil</button>
+      <button onclick="hideAdult()">Cancel</button>
+    </div>
+  </div>
+
+  <script src="./lung-surprise-eye.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
