@@ -73,3 +73,38 @@ button:hover { border-color:#c5a46e; }
 #resonance { color: #d4b98a; font-weight: 600; }
 
 .note { font-size: 10px; color: var(--dim); margin-top: 8px; opacity: 0.85; }
+
+/* === SENSE PASS (2026-07-16): one protagonist · hierarchy · 8px grid === */
+
+/* SENSE 1 — one gold protagonist per screen.
+   Nav "Create Ad" was solid-gold AND every in-section CTA is solid-gold =>
+   two protagonists fighting the eye. Make nav's Create a quiet gold-outline
+   (still the primary nav destination) and reserve the solid-gold fill for the
+   single in-section .primary action. Now each screen has exactly one gold. */
+.nav button.primary {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  font-weight: 600;
+}
+.nav button.primary:hover { background: rgba(197,164,110,0.10); }
+
+/* SENSE 2 — restore hierarchy. Section <h2> had no rule -> browser default
+   ~28px, out-shouting the 24px brand <h1>. Pull it under the brand, left-align
+   to match the left-aligned body (kills the centered-header / left-body axis clash). */
+h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  text-align: left;
+  margin: 0 0 12px;
+}
+h3, h4 { font-weight: 600; color: var(--gold); }
+.section { text-align: left; }
+
+/* SENSE 3 — snap spacing to the 8px grid (nav gap 6->8, section rhythm 24, wallet 8/16). */
+.nav { gap: 8px; margin-bottom: 24px; }
+.wallet { gap: 8px; margin: 16px 0; }
+.section { margin-bottom: 32px; }
+button { transition: all 160ms ease; } /* SENSE motion: 200ms-ish ease-out, feels alive */
