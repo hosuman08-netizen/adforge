@@ -108,3 +108,14 @@ h3, h4 { font-weight: 600; color: var(--gold); }
 .wallet { gap: 8px; margin: 16px 0; }
 .section { margin-bottom: 32px; }
 button { transition: all 160ms ease; } /* SENSE motion: 200ms-ish ease-out, feels alive */
+
+/* === DELIVERY ENGINE UI (core value made visible) === */
+.aud-line { font-size: 11px; color: #d4b98a; margin: 6px 0 4px; }
+.aud-line b { color: var(--gold); }
+.delivery-stats { display: flex; gap: 12px; font-size: 11px; color: var(--dim); margin: 4px 0; }
+.delivery-stats b { color: var(--text); font-size: 12px; }
+.budget-bar { height: 5px; background: #1a1712; border-radius: 3px; overflow: hidden; margin: 6px 0 3px; }
+.budget-bar > div { height: 100%; background: var(--gold); transition: width 300ms ease; }
+.budget-line { font-size: 10px; color: var(--dim); }
+.last-delivery { font-size: 10px; color: #8fbf7f; margin: 4px 0 2px; }
+.ad-card button[disabled] { opacity: 0.5; cursor: default; border-color: #3a3124; }

@@ -21,6 +21,107 @@ let p11Aura = JSON.parse(localStorage.getItem('p11_aura') || '{}'); // p11 cross
 
 const PLATFORM_FEE_BPS = 100; // 1% (0.5-2% range)
 
+// ============================================================
+// === TARGETING + DELIVERY ENGINE (core value — real logic) ===
+// The defining job of an ad platform: parse targeting → estimate a real
+// audience → deliver against a real budget with internally-consistent
+// impressions/clicks/spend. No random inflation: every number here derives
+// from the audience the advertiser actually chose. Deterministic per ad.
+// ============================================================
+
+// Real audience catalog: reach (unique addressable users, fictional network),
+// baseCpm (Credits per 1000 imps — competition proxy), baseCtr (click propensity).
+const AUDIENCE_SEGMENTS = [
+  { key: 'web3',        label: 'Web3 / Crypto',     aliases: ['web3','crypto','defi','dao','onchain','on-chain','nft','base','solana','wallet'], reach: 82000,  baseCpm: 14, baseCtr: 0.021 },
+  { key: 'beauty',      label: 'Beauty',            aliases: ['beauty','skincare','cosmetic','makeup','glow'],                                     reach: 61000,  baseCpm: 11, baseCtr: 0.034 },
+  { key: 'gaming',      label: 'Gaming',            aliases: ['gaming','gamer','game','esports','play'],                                           reach: 138000, baseCpm: 8,  baseCtr: 0.028 },
+  { key: 'founders',    label: 'Founders / Builders',aliases: ['founder','founders','builder','startup','indie','vc','investor'],                  reach: 24000,  baseCpm: 22, baseCtr: 0.018 },
+  { key: 'creators',    label: 'Creators',          aliases: ['creator','creators','artist','music','voice','ugc'],                                reach: 95000,  baseCpm: 9,  baseCtr: 0.030 },
+  { key: 'youngadult',  label: 'Young Adults 18-24',aliases: ['young','young adults','youth','genz','gen z','student'],                            reach: 210000, baseCpm: 6,  baseCtr: 0.024 },
+  { key: 'women',       label: 'Women',             aliases: ['women','woman','female','she'],                                                     reach: 176000, baseCpm: 10, baseCtr: 0.027 },
+  { key: 'metaverse',   label: 'Metaverse',         aliases: ['metaverse','vr','avatar','land','billboard','virtual'],                             reach: 47000,  baseCpm: 13, baseCtr: 0.020 },
+  { key: 'ideas',       label: 'Ideas / Innovation',aliases: ['idea','ideas','innovation','pitch','p12'],                                          reach: 33000,  baseCpm: 12, baseCtr: 0.022 },
+  { key: 'adult',       label: 'Adult 18+',         aliases: ['adult','18+','eros','nsfw','mature'],                                               reach: 58000,  baseCpm: 16, baseCtr: 0.038 }
+];
+const GENERAL_SEGMENT = { key: 'general', label: 'General (Broad)', reach: 320000, baseCpm: 5, baseCtr: 0.012 };
+
+// Small deterministic string hash → stable per-ad jitter (no Math.random in core).
+function _hashStr(s) {
+  let h = 2166136261 >>> 0;
+  s = String(s);
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return h >>> 0;
+}
+
+// Parse free-text targeting into matched segments (real matching, not cosmetic).
+function parseTargeting(targetText) {
+  const t = (targetText || '').toLowerCase();
+  const matched = [];
+  AUDIENCE_SEGMENTS.forEach(seg => {
+    if (seg.aliases.some(a => t.includes(a))) matched.push(seg);
+  });
+  if (matched.length === 0) matched.push(GENERAL_SEGMENT);
+  return matched;
+}
+
+// Estimate the audience for an ad: total reach, blended CPM/CTR, and a
+// relevance score (0-1). Narrower + coherent targeting = higher relevance =
+// better CTR & efficiency. This is the real "targeting matters" logic.
+function estimateAudience(targetText, surprise = 0.4) {
+  const segs = parseTargeting(targetText);
+  // Union reach with diminishing overlap (each extra segment adds less new reach).
+  let reach = 0;
+  segs.forEach((s, i) => { reach += Math.round(s.reach * Math.pow(0.72, i)); });
+  const blendedCpm = segs.reduce((a, s) => a + s.baseCpm, 0) / segs.length;
+  const blendedCtr = segs.reduce((a, s) => a + s.baseCtr, 0) / segs.length;
+  // Relevance: focused targeting (1-3 segments) beats spray; broad/general is weak.
+  const focusBonus = segs.length === 0 ? 0 : Math.max(0, 1 - (segs.length - 1) * 0.18);
+  const generalPenalty = segs.some(s => s.key === 'general') ? 0.45 : 1;
+  // Voice surprise lifts creative relevance (bounded, honest — it's a modifier).
+  const creativeLift = 0.85 + Math.min(0.3, surprise * 0.3);
+  const relevance = Math.max(0.15, Math.min(1, focusBonus * generalPenalty * creativeLift));
+  return {
+    segments: segs.map(s => s.label),
+    segmentKeys: segs.map(s => s.key),
+    reach,
+    cpm: +(blendedCpm).toFixed(2),
+    ctr: +(blendedCtr * (0.7 + relevance * 0.6)).toFixed(4), // relevance modulates realized CTR
+    relevance: +relevance.toFixed(2)
+  };
+}
+
+// Deliver an ad against its remaining budget. Budget is REALLY consumed at the
+// effective CPM; impressions/clicks/spend are internally consistent and capped
+// by both budget and unique audience reach (frequency cap ~3x). Deterministic.
+function deliverAd(ad, spendNow) {
+  const est = estimateAudience(ad.target, ad.surprise || 0.4);
+  ad.audience = est; // cache the real estimate on the ad
+  const remaining = Math.max(0, (ad.budget || 0) - (ad.spent || 0));
+  const spend = Math.max(0, Math.min(spendNow == null ? remaining : spendNow, remaining));
+  if (spend <= 0) return { impressions: 0, clicks: 0, spend: 0, capped: 'budget', est };
+
+  // Effective CPM: surprise-driven creative quality slightly lowers cost (better
+  // quality score), stable jitter per ad keeps runs distinct but reproducible.
+  const jitter = 0.9 + (_hashStr(ad.id + ':' + (ad.spent || 0)) % 200) / 1000; // 0.90–1.099
+  const qualityDiscount = 1 - Math.min(0.25, (ad.surprise || 0.4) * 0.25);
+  const effCpm = Math.max(1, est.cpm * qualityDiscount * jitter);
+
+  let impressions = Math.floor((spend / effCpm) * 1000);
+  // Frequency cap: can't show more than ~3 imps per unique user in reach.
+  const impCap = est.reach * 3;
+  let capped = null;
+  if (impressions > impCap) { impressions = impCap; capped = 'reach'; }
+  const actualSpend = Math.min(spend, +((impressions / 1000) * effCpm).toFixed(2));
+  const clicks = Math.floor(impressions * est.ctr);
+
+  ad.impressions = (ad.impressions || 0) + impressions;
+  ad.clicks = (ad.clicks || 0) + clicks;
+  ad.spent = +((ad.spent || 0) + actualSpend).toFixed(2);
+  ad.lastDelivery = { impressions, clicks, spend: actualSpend, cpm: +effCpm.toFixed(2), ctr: est.ctr, ts: Date.now() };
+  if (capped === null && (ad.budget - ad.spent) < 0.5) capped = 'budget';
+  return { impressions, clicks, spend: actualSpend, cpm: +effCpm.toFixed(2), ctr: est.ctr, capped, est };
+}
+
 // === LILITH PSYCH + FULL-CHEAT ENGINE (p16 Web3 Ad) ===
 // Advertisers: FOMO performance, variable bids/earnings, near-miss auctions, loss on missed, endowment on owned.
 // Creators: symmetric (high bids incoming FOMO, variable earnings, near-miss on listing, loss on unbid slots, endowment on "my slots").
@@ -364,18 +465,20 @@ function createAd() {
     adult: !!isAdult
   };
   
+  // CORE: compute the real audience from targeting at creation time.
+  ad.audience = estimateAudience(ad.target, surprise);
+  ad.clicks = 0;
+
   ads.unshift(ad);
   localStorage.setItem('p16_ads', JSON.stringify(ads));
-  
+
   if (surprise > 0.55) plantAdSpore(ad); // Birth 1
   LilithPsych.updateResonance();
-  LilithPsych.applyFomo(ad);
-  enhanceFomoOnAction(ad);
-  addToCodex(`Created ad: ${title}. Voice surprise ${surprise}. Lilith Psych Resonance ${LilithPsych.resonance.toFixed(2)}. FOMO + variable active.${isAdult ? ' [Eros Veil]' : ''}`);
-  
+  addToCodex(`Created ad: ${title}. Audience ${ad.audience.reach.toLocaleString()} in [${ad.audience.segments.join(', ')}] • relevance ${ad.audience.relevance} • CPM ${ad.audience.cpm}. Voice surprise ${surprise}.${isAdult ? ' [Eros Veil]' : ''}`);
+
   // 미꾸라지 Step 3: prominent disclosure injected
   const shield = "FICTIONAL ONLY. Simulated performance. Utility credits only — no real value or securities. Adult content (p8/p9) gated 18+.";
-  alert(`Ad created (FICTIONAL). ${shield}\nFOMO sim: ${slotsLeft} premium slots left. Resonance ${LilithPsych.resonance.toFixed(2)}x.`);
+  alert(`Ad created (FICTIONAL). ${shield}\n\nTARGETING → AUDIENCE\nSegments: ${ad.audience.segments.join(', ')}\nEstimated reach: ${ad.audience.reach.toLocaleString()} users\nRelevance: ${(ad.audience.relevance*100).toFixed(0)}% • est. CPM ${ad.audience.cpm} • est. CTR ${(ad.audience.ctr*100).toFixed(2)}%\nBudget ${budget} → ~${Math.floor((budget/Math.max(1,ad.audience.cpm))*1000).toLocaleString()} projected imps.\n\nOpen Inventory → "Deliver" to run the campaign.`);
   document.getElementById('ad-title').value = '';
   document.getElementById('ad-desc').value = '';
   showInventory();
@@ -406,17 +509,51 @@ function showInventory() {
     el.className = 'ad-card';
     const birthTag = ((ad.surprise||0) > 0.55) ? ' 🌱AdSpore' : '';
     const adultTag = ad.adult ? ' 🔞Eros' : '';
+    // Ensure a real audience estimate exists (covers legacy/seed ads).
+    const aud = ad.audience || (ad.audience = estimateAudience(ad.target, ad.surprise || 0.4));
+    const remaining = Math.max(0, (ad.budget || 0) - (ad.spent || 0));
+    const budgetPct = ad.budget ? Math.min(100, Math.round(((ad.spent||0) / ad.budget) * 100)) : 0;
+    const ctrRealized = (ad.impressions && ad.clicks != null) ? ((ad.clicks / ad.impressions) * 100).toFixed(2) : (aud.ctr*100).toFixed(2);
+    const spentDisplay = (typeof ad.spent === 'number') ? ad.spent : 0;
+    const ld = ad.lastDelivery;
     el.innerHTML = `
       <strong>${ad.title}</strong>${adultTag}${birthTag}<br>
       <small>${(ad.desc||'').substring(0,60)}...</small><br>
       <div class="surprise">👁 Surprise: ${(ad.surprise||0).toFixed(2)} ${ad.voiceUrl || ad.voiceOver ? '🎙' : ''} ${ad.voiceAnalysis ? '📊' : ''}</div>
-      <div>Budget: ${ad.budget} | Spent: ${ad.spent} | Imps: ${ad.impressions}</div>
-      <div>Target: ${ad.target}</div>
-      <button onclick="bidOnAd(${ad.id})">Bid (FOMO)</button>
+      <div class="aud-line">🎯 <b>${aud.segments.join(' + ')}</b> — reach ${aud.reach.toLocaleString()} • relevance ${(aud.relevance*100).toFixed(0)}%</div>
+      <div class="delivery-stats">
+        <span>Imps <b>${(ad.impressions||0).toLocaleString()}</b></span>
+        <span>Clicks <b>${(ad.clicks||0).toLocaleString()}</b></span>
+        <span>CTR <b>${ctrRealized}%</b></span>
+      </div>
+      <div class="budget-bar" title="Spent ${spentDisplay} of ${ad.budget}"><div style="width:${budgetPct}%"></div></div>
+      <div class="budget-line">Budget ${spentDisplay}/${ad.budget} Credits (${remaining.toFixed(0)} left) • CPM ${aud.cpm}</div>
+      ${ld ? `<div class="last-delivery">▶ last run: +${ld.impressions.toLocaleString()} imps, +${ld.clicks} clicks, −${ld.spend} @ CPM ${ld.cpm}</div>` : ''}
+      <button onclick="runDelivery(${ad.id})" ${remaining < 0.5 ? 'disabled' : ''}>${remaining < 0.5 ? '✓ Budget spent' : '📡 Deliver (spend budget)'}</button>
+      <button onclick="bidOnAd(${ad.id})" style="margin-top:3px">Boost bid (FOMO)</button>
       <button onclick="analyzeAdPerformanceWithVoice(${ad.id});startVoicePerformanceMeter(${ad.id})" style="margin-top:3px;font-size:10px">👁 p6 Voice Analyze + Meter</button>
     `;
     list.appendChild(el);
   });
+}
+
+// CORE ACTION: run real delivery. Spends up to ~30% of remaining budget per run
+// so the advertiser watches impressions/clicks accrue and budget deplete — a
+// real, bounded campaign, not random inflation.
+function runDelivery(id) {
+  const ad = ads.find(a => a.id === id);
+  if (!ad) return;
+  const remaining = Math.max(0, (ad.budget || 0) - (ad.spent || 0));
+  if (remaining < 0.5) { alert('Budget fully spent. This campaign has delivered its full run.'); return; }
+  const chunk = Math.max(1, Math.min(remaining, Math.ceil(remaining * 0.34)));
+  const r = deliverAd(ad, chunk);
+  localStorage.setItem('p16_ads', JSON.stringify(ads));
+  addToCodex(`Delivered ${ad.title}: +${r.impressions.toLocaleString()} imps, +${r.clicks} clicks, −${r.spend} Credits @ CPM ${r.cpm} (CTR ${(r.ctr*100).toFixed(2)}%).`);
+  const capMsg = r.capped === 'reach'
+    ? '\n⚠ Frequency cap hit — audience reach saturated (widen targeting for more).'
+    : r.capped === 'budget' ? '\n✓ Budget now fully spent — campaign complete.' : '';
+  alert(`📡 Delivered (FICTIONAL sim)\n+${r.impressions.toLocaleString()} impressions\n+${r.clicks} clicks (CTR ${(r.ctr*100).toFixed(2)}%)\n−${r.spend} Credits spent @ CPM ${r.cpm}\nBudget left: ${(ad.budget - ad.spent).toFixed(0)}${capMsg}`);
+  showInventory();
 }
 
 function bidOnAd(id) {
