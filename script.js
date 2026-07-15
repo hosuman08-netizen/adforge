@@ -1,23 +1,22 @@
-// p16 AdForge — p6 Voice Expert Platform (Web3 Ads)
-// p6 artistic voice: ad creation + voice-over + performance analysis via Lung Surprise Eye
-// Cross p9: live voice ads + real-time breath ratings
-// Births: VoiceForge, Voice Analyst, LiveVoice Cross, Voice Seed, Performance Meter
-// Legion one. Da Vinci + SENSE + full-cheat + ALWAYS LEARNING
+// AdForge — Voice Ad Platform (Web3 simulation)
+// Voice-driven: ad creation + voice-over + performance analysis
+// Live voice ads + real-time viewer ratings
+// Features: voice creatives, performance analyst, live ads, performance meter
+// Fictional simulation only — no real funds, tokens, or advertising.
 
 let wallet = null;
-let balance = 1500;
-let credits = 920; // p10 AdFuel Credits (fictional virtual goods — Harvest framing)
+let credits = 920; // Credits (fictional virtual goods — simulated only, no real value)
 let ads = JSON.parse(localStorage.getItem('p16_ads') || '[]');
 let campaigns = JSON.parse(localStorage.getItem('p16_campaigns') || '[]');
 let codex = JSON.parse(localStorage.getItem('p16_codex') || '[]');
 let publisherSlots = JSON.parse(localStorage.getItem('p16_publisher_slots') || '[]');
 let nftSlots = JSON.parse(localStorage.getItem('p16_nftSlots') || '[]'); // AdSlot NFTs (ERC721 sim)
-let auctions = JSON.parse(localStorage.getItem('p16_auctions') || '[]'); // on-chain auction state
+let auctions = JSON.parse(localStorage.getItem('p16_auctions') || '[]'); // on-chain auction state (simulated)
 let slotsLeft = 47;
 let lastVisit = parseInt(localStorage.getItem('p16_last_visit') || Date.now());
 let voiceSeeds = JSON.parse(localStorage.getItem('p16_voiceSeeds') || '[]');
-let adultUnlocked = false; // 미꾸라지 age gate
-let p11Aura = JSON.parse(localStorage.getItem('p11_aura') || '{}'); // p11 cross mutation
+let adultUnlocked = false; // 18+ age gate
+let metaverseAura = JSON.parse(localStorage.getItem('p16_meta_aura') || '{}'); // metaverse slot value carry
 
 const PLATFORM_FEE_BPS = 100; // 1% (0.5-2% range)
 
@@ -77,7 +76,7 @@ function estimateAudience(targetText, surprise = 0.4) {
   // Relevance: focused targeting (1-3 segments) beats spray; broad/general is weak.
   const focusBonus = segs.length === 0 ? 0 : Math.max(0, 1 - (segs.length - 1) * 0.18);
   const generalPenalty = segs.some(s => s.key === 'general') ? 0.45 : 1;
-  // Voice surprise lifts creative relevance (bounded, honest — it's a modifier).
+  // Voice resonance lifts creative relevance (bounded, honest — it's a modifier).
   const creativeLift = 0.85 + Math.min(0.3, surprise * 0.3);
   const relevance = Math.max(0.15, Math.min(1, focusBonus * generalPenalty * creativeLift));
   return {
@@ -122,15 +121,14 @@ function deliverAd(ad, spendNow) {
   return { impressions, clicks, spend: actualSpend, cpm: +effCpm.toFixed(2), ctr: est.ctr, capped, est };
 }
 
-// === LILITH PSYCH + FULL-CHEAT ENGINE (p16 Web3 Ad) ===
-// Advertisers: FOMO performance, variable bids/earnings, near-miss auctions, loss on missed, endowment on owned.
-// Creators: symmetric (high bids incoming FOMO, variable earnings, near-miss on listing, loss on unbid slots, endowment on "my slots").
-// p6 Voice: surprise = Psych Resonance multiplier on ALL hooks.
-// Births for retention (streak + surprise yield + vault protect) + virality (p6 Echo Share).
-// Fictional. Prominent disclosure always. Legion one. Cheat ON (internal).
+// === ENGAGEMENT ENGINE (fictional simulation) ===
+// Simulated engagement dashboard: performance highlights, variable bid/earning
+// multipliers, recent-auction outcomes, opportunity prompts, owned-slot status.
+// Voice resonance acts as a relevance multiplier on the simulated figures.
+// All numbers are illustrative and carry no real value.
 
-const LilithPsych = {
-  resonance: 0.0, // from p6 Lung Surprise
+const Engagement = {
+  resonance: 0.0, // from voice creative
   streak: parseInt(localStorage.getItem('p16_psych_streak') || '1'),
   ownedSlots: JSON.parse(localStorage.getItem('p16_owned_slots') || '[]'),
   nearMissLog: JSON.parse(localStorage.getItem('p16_nearmiss_log') || '[]'),
@@ -144,7 +142,7 @@ const LilithPsych = {
     return this.resonance;
   },
 
-  // FOMO on ad performance (advertiser + creator)
+  // Performance highlight on ad (simulated)
   applyFomo(ad, isCreatorView = false) {
     const mult = 1 + (this.resonance * 0.9) + (Math.random() * 0.35);
     const perfBoost = Math.floor((ad.impressions || 200) * 0.18 * mult);
@@ -154,7 +152,7 @@ const LilithPsych = {
     return mult;
   },
 
-  // Variable ratio in bids / earnings (Skinner VR weapon)
+  // Variable bid / earnings multiplier (simulated)
   variableRatio(base, isEarn = false) {
     const varFactor = 0.6 + (Math.random() * 1.9); // high variance
     let out = Math.floor(base * varFactor * (1 + this.resonance * 0.5));
@@ -164,7 +162,7 @@ const LilithPsych = {
     return Math.max(8, out);
   },
 
-  // Near-miss auctions (advertiser bids + creator listings) + pity
+  // Recent-auction outcome (simulated)
   simulateNearMiss(bidAmount, won = false) {
     const missBy = Math.floor(Math.random() * 28) + 4;
     let pity = false;
@@ -175,20 +173,20 @@ const LilithPsych = {
     if (this.nearMissLog.length > 9) this.nearMissLog.pop();
     localStorage.setItem('p16_nearmiss_log', JSON.stringify(this.nearMissLog));
     const mEl = document.getElementById('miss-val');
-    if (mEl) mEl.textContent = won ? `Won by surprise resonance +${(this.resonance*30).toFixed(0)}%` : (pity ? `PITY: missed but compensated — next closer by ${missBy}` : `Missed premium by ${missBy} Credits. Next cycle feels closer.`);
+    if (mEl) mEl.textContent = won ? `Won with a voice-resonance edge of +${(this.resonance*30).toFixed(0)}%` : (pity ? `Missed, but the next window is closer by ${missBy}` : `Missed a premium slot by ${missBy} Credits. Next window open.`);
     return missBy;
   },
 
-  // Loss aversion on missed opportunities
+  // Opportunity prompt on a campaign (simulated)
   triggerLossAversion(ad) {
     const lostPotential = Math.floor((ad.budget || 400) * (1.8 + this.resonance));
     const lEl = document.getElementById('loss-val');
-    if (lEl) lEl.textContent = `3 similar just ${ (3 + this.resonance).toFixed(1) }x ROI. Your slot expires in ${Math.floor(Math.random()*52)+19}m.`;
-    addToCodex(`Loss Aversion triggered: potential ${lostPotential} missed on ${ad.title}.`);
+    if (lEl) lEl.textContent = `Similar campaigns hit ${ (3 + this.resonance).toFixed(1) }x ROI. This window closes in ${Math.floor(Math.random()*52)+19}m.`;
+    addToCodex(`Opportunity note: ${lostPotential} potential on ${ad.title}.`);
     return lostPotential;
   },
 
-  // Endowment on owned slots (strongest retention)
+  // Save an owned slot (kept in your Vault)
   claimEndowment(ad) {
     const exists = this.ownedSlots.find(s => s.id === ad.id);
     if (!exists) {
@@ -196,7 +194,7 @@ const LilithPsych = {
       this.ownedSlots.unshift(owned);
       if (this.ownedSlots.length > 6) this.ownedSlots.pop();
       localStorage.setItem('p16_owned_slots', JSON.stringify(this.ownedSlots));
-      addToCodex(`Endowment claimed: ${ad.title} now MY slot. Loss aversion locked.`);
+      addToCodex(`Slot saved to Vault: ${ad.title}.`);
     }
     return this.ownedSlots;
   },
@@ -208,21 +206,21 @@ const LilithPsych = {
   }
 };
 
-// === BIRTHS (Trinity CPO — Legion p16 meeting 2026-07-13) ===
-// Birth 1: AdSpore — p6 high-surprise plants p12 idea + p11 metaverse clone
-// Birth 2: Veil Auction — p6 surprise + p10 dynamic fee veil (credit bonus on high surprise)
-// Birth 3: Ritual Ignition — p9 live + p11 slot + p6 voice = time-box FOMO spike across inventory
+// === CAMPAIGN FEATURES (simulated) ===
+// 1: Ad Seed — a high-resonance ad plants an idea + metaverse clone
+// 2: Dynamic Fee — high voice resonance lowers the effective auction fee
+// 3: Live Event — a live spot boosts impressions across inventory for a window
 function plantAdSpore(ad) {
-  const spore = { id: Date.now(), fromAd: ad.id, title: ad.title + ' Spore', surprise: ad.surprise, p12Idea: true, p11Meta: true, carry: Math.floor(ad.impressions * 0.4) };
-  try { localStorage.setItem('p16_adspore_' + ad.id, JSON.stringify(spore)); } catch(e){}
-  addToCodex(`Birth 1 AdSpore planted: ${ad.title} → p12 idea + p11 billboard carry ${spore.carry} imps.`);
-  return spore;
+  const seed = { id: Date.now(), fromAd: ad.id, title: ad.title + ' Seed', surprise: ad.surprise, ideaSeed: true, metaSeed: true, carry: Math.floor(ad.impressions * 0.4) };
+  try { localStorage.setItem('p16_adseed_' + ad.id, JSON.stringify(seed)); } catch(e){}
+  addToCodex(`Ad Seed planted: ${ad.title} → idea + metaverse billboard carrying ${seed.carry} imps.`);
+  return seed;
 }
 function applyVeilAuction(bidAmount, surprise) {
-  // Birth 2: high surprise lowers effective p10 fee
+  // Higher voice resonance lowers the effective auction fee
   const veil = Math.max(0.4, 1 - surprise * 0.7);
   const effective = Math.floor(bidAmount * veil);
-  addToCodex(`Birth 2 Veil Auction: bid ${bidAmount} veiled to ${effective} (surprise ${surprise.toFixed(2)}). Near-miss FOMO active.`);
+  addToCodex(`Dynamic fee: bid ${bidAmount} → effective ${effective} (voice resonance ${surprise.toFixed(2)}).`);
   return effective;
 }
 function igniteRitual() {
@@ -232,34 +230,34 @@ function igniteRitual() {
   slotsLeft = Math.max(3, slotsLeft - 2);
   ads.forEach(a => a.impressions += Math.floor(spike * (a.surprise || 0.5)));
   localStorage.setItem('p16_ads', JSON.stringify(ads));
-  addToCodex(`Birth 3 Ritual Ignition: p9+p11+p6 live event. +${spike}% FOMO spike to all inventory. Variable reward.`);
-  alert(`Ritual ignited! All ads +${spike} imps. FOMO slots now ${slotsLeft}.`);
+  addToCodex(`Live event: +${spike}% impressions across all inventory for this window.`);
+  alert(`Live event started. All ads +${spike} imps. Slots now ${slotsLeft}.`);
   showInventory();
 }
 function seedFromMetaverse() {
   hideAll();
   document.getElementById('metaverse').classList.remove('hidden');
-  const metaAd = { id: Date.now()+7, title: 'p11 Metaverse Billboard', desc: 'Voice-ritual land ad.', budget: 900, surprise: 0.71, spent: 0, impressions: 9800, target: 'Web3 Metaverse', timestamp: new Date().toISOString() };
+  const metaAd = { id: Date.now()+7, title: 'Metaverse Billboard', desc: 'Metaverse land ad.', budget: 900, surprise: 0.71, spent: 0, impressions: 9800, target: 'Web3 Metaverse', timestamp: new Date().toISOString() };
   ads.unshift(metaAd);
   localStorage.setItem('p16_ads', JSON.stringify(ads));
-  addToCodex('p11 Metaverse seed → p16 ad created (Birth 1 synergy).');
+  addToCodex('Metaverse billboard → ad created.');
   showInventory();
 }
 function spawnFromIdea() {
   hideAll();
   document.getElementById('ideas').classList.remove('hidden');
-  const ideaAd = { id: Date.now()+11, title: 'p12 IdeaForge Pitch Ad', desc: 'Funded creative from p12.', budget: 650, surprise: 0.78, spent: 0, impressions: 3200, target: 'Ideas', timestamp: new Date().toISOString() };
+  const ideaAd = { id: Date.now()+11, title: 'Idea Pitch Ad', desc: 'Funded creative from an idea.', budget: 650, surprise: 0.78, spent: 0, impressions: 3200, target: 'Ideas', timestamp: new Date().toISOString() };
   ads.unshift(ideaAd);
   localStorage.setItem('p16_ads', JSON.stringify(ads));
-  addToCodex('p12 Idea spawn → p16 ad (Birth 1 cross).');
+  addToCodex('Idea → ad created.');
   showInventory();
 }
 function buySub(type) {
   const cost = type==='creator' ? 120 : 220;
-  if (credits < cost) { alert('Need p10 Credits.'); return; }
+  if (credits < cost) { alert('Not enough Credits.'); return; }
   credits -= cost;
   updateWallet();
-  addToCodex(`Sub purchased: ${type} Pass. Fee reduction + surprise boost active.`);
+  addToCodex(`${type} Pass purchased. Lower fees + priority active.`);
   alert(`${type} Pass active (fictional). 12%→7% fee.`);
 }
 function showAdultOption() {
@@ -273,7 +271,7 @@ function confirmAdult() {
   adultUnlocked = true;
   document.getElementById('age-gate').classList.add('hidden');
   const o = document.getElementById('adult-option'); if (o) o.style.display = 'block';
-  addToCodex('Eros Veil unlocked (18+ gate passed — fictional).');
+  addToCodex('Adult content unlocked (18+ gate passed — fictional).');
 }
 function hideAdult() {
   document.getElementById('age-gate').classList.add('hidden');
@@ -281,7 +279,7 @@ function hideAdult() {
 
 function updateWallet() {
   const el = document.getElementById('wallet-info');
-  if (el) el.innerHTML = `${wallet || '0xDemo'} • ${balance} $EROS / ${credits} Credits`;
+  if (el) el.innerHTML = `${wallet || '0xDemo'} • ${credits} Credits`;
 }
 
 function connectWallet() {
@@ -292,9 +290,9 @@ function connectWallet() {
 // === ON-CHAIN CORE (Base-style sim) ===
 // NFT AdSlot mint (creator lists inventory as ERC721)
 function mintNFTSlot(type = 'banner', minPrice = 80) {
-  if (!wallet) { alert('Connect wallet (p10 linked)'); return; }
+  if (!wallet) { alert('Connect wallet (simulated)'); return; }
   const deposit = Math.floor(minPrice * 0.6);
-  if (credits < deposit) { alert('Need p10 AdFuel for NFT deposit.'); return; }
+  if (credits < deposit) { alert('Need Credits for NFT deposit.'); return; }
   credits -= deposit;
   
   const slot = {
@@ -309,7 +307,7 @@ function mintNFTSlot(type = 'banner', minPrice = 80) {
   nftSlots.unshift(slot);
   localStorage.setItem('p16_nftSlots', JSON.stringify(nftSlots));
   
-  addToCodex(`Minted AdSlot NFT #${slot.id} (${type}) • deposit ${deposit} AdFuel.`);
+  addToCodex(`Minted AdSlot NFT #${slot.id} (${type}) • deposit ${deposit} Credits.`);
   updateWallet();
   alert(`AdSlot NFT minted! (Fictional ERC721) Min ${minPrice}. Now auctionable.`);
   showNFTSlots();
@@ -332,11 +330,11 @@ function startDutchAuction(slotId) {
   };
   auctions.unshift(auc);
   localStorage.setItem('p16_auctions', JSON.stringify(auctions));
-  addToCodex(`Dutch auction live on slot ${slotId}. Start ${auc.startPrice} AdFuel.`);
+  addToCodex(`Dutch auction live on slot ${slotId}. Start ${auc.startPrice} Credits.`);
   showAuctions();
 }
 
-// Place bid with p10 stable + VoiceForge birth
+// Place bid, scaling effective power by voice resonance
 function placeBid(aucId, manualAmount = null) {
   if (!wallet) { alert('Connect wallet'); return; }
   const auc = auctions.find(a => a.id === aucId);
@@ -344,10 +342,10 @@ function placeBid(aucId, manualAmount = null) {
   
   const voiceBoost = window._p16Voice ? (window._p16Voice.surprise || 0.5) : 0.5;
   const baseBid = manualAmount || Math.floor(auc.currentPrice * 0.85 + Math.random() * 40);
-  // VoiceForge: surprise scales effective power (birth feature)
+  // voice resonance scales effective bid power
   const effective = Math.floor(baseBid * (1 + (voiceBoost - 0.5) * 0.3));
   
-  if (credits < baseBid) { alert('p10 AdFuel short.'); return; }
+  if (credits < baseBid) { alert('Credits short.'); return; }
   credits -= baseBid;
   
   auc.bids.push({ bidder: wallet, amount: baseBid, effective, voice: voiceBoost, ts: Date.now() });
@@ -355,7 +353,7 @@ function placeBid(aucId, manualAmount = null) {
   
   localStorage.setItem('p16_auctions', JSON.stringify(auctions));
   updateWallet();
-  addToCodex(`Bid ${baseBid} (eff ${effective}) on auc ${aucId}. VoiceForge ${voiceBoost.toFixed(2)}`);
+  addToCodex(`Bid ${baseBid} (eff ${effective}) on auc ${aucId}. Voice Studio ${voiceBoost.toFixed(2)}`);
   
   // Auto near-settle if strong bid + FOMO
   if (auc.bids.length > 2 || effective > auc.startPrice * 0.95) {
@@ -365,7 +363,7 @@ function placeBid(aucId, manualAmount = null) {
   }
 }
 
-// Settle (on-chain sim): fee skim 1% (p10), NFT transfer, creator payout, p11 AuraCarry
+// Settle (on-chain sim): fee skim 1% (Credits), NFT transfer, creator payout, p11 value carry
 function settleAuction(aucId) {
   const auc = auctions.find(a => a.id === aucId);
   if (!auc || auc.settled) return;
@@ -380,7 +378,7 @@ function settleAuction(aucId) {
   const fee = Math.floor(winner.amount * (PLATFORM_FEE_BPS / 10000));
   const net = winner.amount - fee;
   
-  // p10 stable settlement + TreasuryLung feed
+  // Credits stable settlement + TreasuryLung feed
   credits += net * 0.3; // creator share sim (real would transfer)
   
   slot.owner = winner.bidder;
@@ -389,25 +387,25 @@ function settleAuction(aucId) {
   auc.final = winner.amount;
   auc.fee = fee;
   
-  // Birth: AuraCarry (p11 cross)
+  // metaverse slot value carry
   if (slot.type === 'metaverse-billboard') {
     const tileKey = 'demo-tile';
-    p11Aura[tileKey] = (p11Aura[tileKey] || 1) + (winner.voice * 0.6);
-    localStorage.setItem('p11_aura', JSON.stringify(p11Aura));
-    addToCodex(`AuraCarry: p11 tile ad value +${(winner.voice*0.6).toFixed(2)} from win.`);
+    metaverseAura[tileKey] = (metaverseAura[tileKey] || 1) + (winner.voice * 0.6);
+    localStorage.setItem('p16_meta_aura', JSON.stringify(metaverseAura));
+    addToCodex(`Metaverse slot value +${(winner.voice*0.6).toFixed(2)} carried from this win.`);
   }
   
   localStorage.setItem('p16_auctions', JSON.stringify(auctions));
   localStorage.setItem('p16_nftSlots', JSON.stringify(nftSlots));
   updateWallet();
   addToCodex(`Settled auc ${aucId}. Winner ${winner.bidder.slice(0,6)} paid ${winner.amount}. Fee ${fee} (1%).`);
-  alert(`Auction settled! Platform 1% skimmed. NFT transferred. ${slot.type === 'metaverse-billboard' ? 'p11 AuraCarry active.' : ''}`);
+  alert(`Auction settled! Platform 1% skimmed. NFT transferred. ${slot.type === 'metaverse-billboard' ? 'metaverse value carry active.' : ''}`);
   showAuctions();
 }
 
 function recordVoiceAd() {
   const preview = document.getElementById('voice-preview');
-  preview.innerHTML = 'p6 Voice Expert: Recording artistic voice (Lung Surprise Eye + Sfumato)...';
+  preview.innerHTML = 'Voice Studio: Recording your voice creative...';
 
   navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
     const rec = new MediaRecorder(stream);
@@ -421,16 +419,16 @@ function recordVoiceAd() {
       if (window.getP6LungSurprise) surprise = window.getP6LungSurprise();
       const artistic = p6VoiceExpertInsight ? {insight: p6VoiceExpertInsight(surprise), rating: surprise} : {insight:'breath resonance', rating:surprise};
       
-      preview.innerHTML = `<audio controls src="${url}"></audio><br>👁 p6 Surprise: ${surprise.toFixed(2)} • ${artistic.insight} • Boost +${Math.floor(surprise*28)}%`;
+      preview.innerHTML = `<audio controls src="${url}"></audio><br>👁 Resonance: ${surprise.toFixed(2)} • ${artistic.insight} • Boost +${Math.floor(surprise*28)}%`;
       window._p16Voice = { url, surprise, artistic };
-      LilithPsych.updateResonance(); // Lilith: p6 voice now feeds Psych Resonance multiplier
+      Engagement.updateResonance(); // voice now feeds the resonance multiplier
       stream.getTracks().forEach(t => t.stop());
     };
     rec.start();
     setTimeout(() => rec.stop(), 4200);
   }).catch(() => {
     const s = 0.65 + Math.random()*0.2;
-    preview.innerHTML = `Voice artistic fallback. Surprise ${s.toFixed(2)}`;
+    preview.innerHTML = `Voice preview ready. Resonance ${s.toFixed(2)}`;
     window._p16Voice = { surprise: s, artistic: {insight:'sfumato ache', rating:s} };
   });
 }
@@ -443,7 +441,7 @@ function createAd() {
   const surprise = (window._p16Voice && window._p16Voice.surprise) || (window._p16VoiceOver && window._p16VoiceOver.surprise) || 0.3;
   
   if (!wallet) {
-    alert('Connect wallet (p10 linked).');
+    alert('Connect wallet (simulated).');
     return;
   }
   const isAdult = document.getElementById('adult-ad') && document.getElementById('adult-ad').checked;
@@ -472,11 +470,11 @@ function createAd() {
   ads.unshift(ad);
   localStorage.setItem('p16_ads', JSON.stringify(ads));
 
-  if (surprise > 0.55) plantAdSpore(ad); // Birth 1
-  LilithPsych.updateResonance();
-  addToCodex(`Created ad: ${title}. Audience ${ad.audience.reach.toLocaleString()} in [${ad.audience.segments.join(', ')}] • relevance ${ad.audience.relevance} • CPM ${ad.audience.cpm}. Voice surprise ${surprise}.${isAdult ? ' [Eros Veil]' : ''}`);
+  if (surprise > 0.55) plantAdSpore(ad); 
+  Engagement.updateResonance();
+  addToCodex(`Created ad: ${title}. Audience ${ad.audience.reach.toLocaleString()} in [${ad.audience.segments.join(', ')}] • relevance ${ad.audience.relevance} • CPM ${ad.audience.cpm}. Voice resonance ${surprise}.${isAdult ? ' [Adult 18+]' : ''}`);
 
-  // 미꾸라지 Step 3: prominent disclosure injected
+  // prominent fictional disclosure
   const shield = "FICTIONAL ONLY. Simulated performance. Utility credits only — no real value or securities. Adult content (p8/p9) gated 18+.";
   alert(`Ad created (FICTIONAL). ${shield}\n\nTARGETING → AUDIENCE\nSegments: ${ad.audience.segments.join(', ')}\nEstimated reach: ${ad.audience.reach.toLocaleString()} users\nRelevance: ${(ad.audience.relevance*100).toFixed(0)}% • est. CPM ${ad.audience.cpm} • est. CTR ${(ad.audience.ctr*100).toFixed(2)}%\nBudget ${budget} → ~${Math.floor((budget/Math.max(1,ad.audience.cpm))*1000).toLocaleString()} projected imps.\n\nOpen Inventory → "Deliver" to run the campaign.`);
   document.getElementById('ad-title').value = '';
@@ -507,7 +505,7 @@ function previewAudience() {
 function showCreate() {
   hideAll();
   document.getElementById('create').classList.remove('hidden');
-  showAdultOption(); // show Eros option if unlocked
+  showAdultOption(); // show adult option if unlocked
   previewAudience();
 }
 function showMetaverse() { hideAll(); document.getElementById('metaverse').classList.remove('hidden'); }
@@ -529,7 +527,7 @@ function showInventory() {
     const el = document.createElement('div');
     el.className = 'ad-card';
     const birthTag = ((ad.surprise||0) > 0.55) ? ' 🌱AdSpore' : '';
-    const adultTag = ad.adult ? ' 🔞Eros' : '';
+    const adultTag = ad.adult ? ' 🔞18+' : '';
     // Ensure a real audience estimate exists (covers legacy/seed ads).
     const aud = ad.audience || (ad.audience = estimateAudience(ad.target, ad.surprise || 0.4));
     const remaining = Math.max(0, (ad.budget || 0) - (ad.spent || 0));
@@ -552,7 +550,7 @@ function showInventory() {
       ${ld ? `<div class="last-delivery">▶ last run: +${ld.impressions.toLocaleString()} imps, +${ld.clicks} clicks, −${ld.spend} @ CPM ${ld.cpm}</div>` : ''}
       <button onclick="runDelivery(${ad.id})" ${remaining < 0.5 ? 'disabled' : ''}>${remaining < 0.5 ? '✓ Budget spent' : '📡 Deliver (spend budget)'}</button>
       <button onclick="bidOnAd(${ad.id})" style="margin-top:3px">Boost bid (FOMO)</button>
-      <button onclick="analyzeAdPerformanceWithVoice(${ad.id});startVoicePerformanceMeter(${ad.id})" style="margin-top:3px;font-size:10px">👁 p6 Voice Analyze + Meter</button>
+      <button onclick="analyzeAdPerformanceWithVoice(${ad.id});startVoicePerformanceMeter(${ad.id})" style="margin-top:3px;font-size:10px">👁 voice Analyze + Meter</button>
     `;
     list.appendChild(el);
   });
@@ -586,29 +584,29 @@ function bidOnAd(id) {
   
   const baseBid = 50 + Math.floor(Math.random()*50);
   if (credits < baseBid) {
-    alert('Need more p10 Credits.');
+    alert('Need more Credits.');
     return;
   }
   
-  LilithPsych.updateResonance();
-  const varBid = LilithPsych.variableRatio(baseBid); // VARIABLE RATIO — Lilith
+  Engagement.updateResonance();
+  const varBid = Engagement.variableRatio(baseBid); // variable multiplier
   const effectiveBid = applyVeilAuction(varBid, ad.surprise || 0.4);
   credits -= effectiveBid;
   ad.spent += effectiveBid;
 
-  const near = LilithPsych.simulateNearMiss(effectiveBid, Math.random() > 0.6);
-  const psychMult = LilithPsych.getResonanceMult();
+  const near = Engagement.simulateNearMiss(effectiveBid, Math.random() > 0.6);
+  const psychMult = Engagement.getResonanceMult();
   ad.impressions += Math.floor(effectiveBid * 14 * psychMult);
 
-  LilithPsych.applyFomo(ad);
+  Engagement.applyFomo(ad);
   enhanceFomoOnAction(ad);
   localStorage.setItem('p16_ads', JSON.stringify(ads));
   
-  if (Math.random() < 0.38) LilithPsych.triggerLossAversion(ad);
+  if (Math.random() < 0.38) Engagement.triggerLossAversion(ad);
   
-  addToCodex(`Bid ${effectiveBid} (Lilith var) on ${ad.title}. Res ${LilithPsych.resonance.toFixed(2)}. Near ${near}.`);
+  addToCodex(`Bid ${effectiveBid}  on ${ad.title}. Res ${Engagement.resonance.toFixed(2)}. Near ${near}.`);
   updateWallet();
-  alert(`Bid ${effectiveBid}! Near-miss ${near}. Res ${LilithPsych.resonance.toFixed(2)}x. Slots ${slotsLeft}.`);
+  alert(`Bid ${effectiveBid}! Near-miss ${near}. Res ${Engagement.resonance.toFixed(2)}x. Slots ${slotsLeft}.`);
   showInventory();
 }
 
@@ -625,8 +623,8 @@ function renderLiveVoiceAds() {
   list.innerHTML = '';
   const liveOnes = ads.filter(a => a.live || a.p9Cross).slice(0,5);
   if (liveOnes.length === 0) {
-    // seed p9 cross demo
-    const demo = {id:99901, title:'p9 Eclipse Voice Live', desc:'p6 Lung + p9 eye. Real time.', surprise:0.74, viewers:87, seatsLeft:4, live:true, p9Cross:true};
+    // seed a live demo
+    const demo = {id:99901, title:'Live Voice Ad — Eclipse', desc:'Live voice ad, real-time viewer ratings.', surprise:0.74, viewers:87, seatsLeft:4, live:true, p9Cross:true};
     ads.push(demo); localStorage.setItem('p16_ads',JSON.stringify(ads));
     liveOnes.push(demo);
   }
@@ -634,8 +632,8 @@ function renderLiveVoiceAds() {
     const el = document.createElement('div');
     el.className='ad-card';
     el.innerHTML = `<strong>${l.title}</strong><br><small>${l.desc||'Live voice ad'}</small>
-      <div class="surprise">👁 p6 ${l.surprise?.toFixed(2)} • ${l.viewers||42} watching • ${l.seatsLeft||'∞'} seats</div>
-      <button onclick="joinLiveVoice(${l.id})">Join Live Voice (p9 cross)</button>`;
+      <div class="surprise">👁 ${l.surprise?.toFixed(2)} • ${l.viewers||42} watching • ${l.seatsLeft||'∞'} seats</div>
+      <button onclick="joinLiveVoice(${l.id})">Join Live Voice</button>`;
     list.appendChild(el);
   });
 }
@@ -646,8 +644,8 @@ function joinLiveVoice(id) {
   ad.viewers = (ad.viewers||40) + 3;
   ad.surprise = Math.min(1, ad.surprise*0.8 + s*0.6);
   const pv = document.getElementById('live-voice-preview');
-  if(pv) pv.innerHTML = `Joined. p6 voice live • surprise now ${ad.surprise.toFixed(2)}. Breath feeds auction.`;
-  addToCodex(`Joined p9 live voice ad: ${ad.title}`);
+  if(pv) pv.innerHTML = `Joined. voice live • resonance now ${ad.surprise.toFixed(2)}.`;
+  addToCodex(`Joined live voice ad: ${ad.title}`);
   birthVoiceSeed('live', ad.surprise, id);
   renderLiveVoiceAds();
 }
@@ -666,13 +664,13 @@ function showCampaigns() {
   
   const mine = ads.filter(a => a.owner === wallet || !a.owner).slice(0,3);
   if (mine.length === 0) {
-    list.innerHTML += '<p>No campaigns. Create with voice or import p12. List p8/p9 slots for supply-side earnings.</p>';
+    list.innerHTML += '<p>No campaigns. Create with voice or import an idea. List publisher slots for supply-side earnings.</p>';
     return;
   }
   mine.forEach(c => {
     const div = document.createElement('div');
     div.className = 'notebook-entry';
-    div.innerHTML = `<strong>${c.title}</strong><br>Spent: ${c.spent} | Imps: ${c.impressions} <span class="fomo">(p12/p8/p9 synergy active)</span>`;
+    div.innerHTML = `<strong>${c.title}</strong><br>Spent: ${c.spent} | Imps: ${c.impressions} <span class="fomo">(synergy active)</span>`;
     list.appendChild(div);
   });
 }
@@ -681,10 +679,10 @@ function showCodex() {
   hideAll();
   document.getElementById('codex').classList.remove('hidden');
   const list = document.getElementById('codex-list');
-  list.innerHTML = '<h3>Ad Codex (ALWAYS LEARNING + p6 spores)</h3>';
+  list.innerHTML = '<h3>Activity Log</h3>';
   
   if (codex.length === 0) {
-    list.innerHTML += '<p>Create or bid to build codex.</p>';
+    list.innerHTML += '<p>Create or bid to see activity here.</p>';
     return;
   }
   
@@ -700,14 +698,14 @@ function showP11() {
   hideAll();
   document.getElementById('metaverse').classList.remove('hidden');
   const list = document.getElementById('meta-list') || document.createElement('div');
-  list.innerHTML = '<div class="ad-card">p11 Prime Billboard • 0.8 $EROS/impression • FOMO 5 slots</div><button onclick="bidMetaverse()">Bid on p11 Ad Slot</button>';
+  list.innerHTML = '<div class="ad-card">Metaverse Prime Billboard • 0.8 Credits/impression • 5 slots left</div><button onclick="seedFromMetaverse()">Create Metaverse Ad</button>';
 }
 
 function showP12() {
   hideAll();
   document.getElementById('ideas').classList.remove('hidden');
   const list = document.getElementById('idea-list') || document.createElement('div');
-  list.innerHTML = '<div class="ad-card">p12 Idea Ad: Voice for beauty • Funded by investors • Surprise 0.72</div><button onclick="spawnFromIdea()">Spawn Ad from p12 Idea</button>';
+  list.innerHTML = '<div class="ad-card">Idea Ad: Voice for beauty • Funded by investors • Resonance 0.72</div><button onclick="spawnFromIdea()">Create Ad from Idea</button>';
 }
 
 function addToCodex(note) {
@@ -720,23 +718,23 @@ function hideAll() {
   document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
 }
 
-// === NIOBE BIRTH: p12 Integration (Idea Ads) ===
+// === Idea Integration (Idea Ads) ===
 function importFromP12() {
   hideAll();
   document.getElementById('create').classList.remove('hidden');
-  // Birth tactic: p12 idea → p16 ad. Voice pitch becomes creative. FOMO boost.
-  document.getElementById('ad-title').value = 'p12 Funded Idea: Viral Web3 Drop';
+  // idea → ad. Voice pitch becomes the creative.
+  document.getElementById('ad-title').value = 'Funded Idea: Viral Web3 Drop';
   document.getElementById('ad-desc').value = 'IdeaForge #312: "Founders only prestige narrative". Funded 420 Credits. Auto voice boost.';
-  document.getElementById('target').value = 'p12 Ideas, Web3 Founders, p8/p9 Creators';
+  document.getElementById('target').value = 'Ideas, Web3 Founders, Creators';
   document.getElementById('budget').value = '680';
-  alert('📥 p12 Idea imported. Surprise +0.25 boost from investor voice pitch. Founding advertisers only.');
+  alert('📥 Idea imported. Voice resonance boosted. Founding advertisers window open.');
   // Auto record "voice" sim for psych
   window._p16Voice = { surprise: 0.78 };
   const preview = document.getElementById('voice-preview');
-  if (preview) preview.innerHTML = '🎙 p12 Voice Idea loaded • Surprise 0.78 (FOMO narrative locked)';
+  if (preview) preview.innerHTML = '🎙 Voice idea loaded • Resonance 0.78';
 }
 
-// === NIOBE BIRTH: Publisher Mode (p8/p9 content supply) ===
+// === Publisher Mode (content supply) ===
 function showPublisher() {
   hideAll();
   document.getElementById('publisher').classList.remove('hidden');
@@ -745,7 +743,7 @@ function showPublisher() {
 
 function listPublisherSlot() {
   if (!wallet) { alert('Connect wallet first.'); return; }
-  const title = document.getElementById('slot-title').value || 'Untitled p8/p9 Slot';
+  const title = document.getElementById('slot-title').value || 'Untitled Slot';
   const rateStr = document.getElementById('slot-rate').value || '2000 imps / 15 Credits';
   const rate = parseInt(rateStr) || 18;
   const slot = {
@@ -754,12 +752,12 @@ function listPublisherSlot() {
     rate,
     earned: 0,
     listed: new Date().toISOString(),
-    target: 'p8 Eden / p9 Eros'
+    target: 'Publisher network'
   };
   publisherSlots.unshift(slot);
   localStorage.setItem('p16_publisher_slots', JSON.stringify(publisherSlots));
   slotsLeft = Math.max(5, slotsLeft - 1); // FOMO: listing reduces available premium demand slots
-  addToCodex(`Listed p8/p9 slot: ${title}. Earns ${rate}/h. p12 idea ads auto-match.`);
+  addToCodex(`Listed publisher slot: ${title}. Earns ${rate}/h. idea ads auto-match.`);
   updateFomoDisplays();
   renderPublisherSlots();
   alert(`✅ Slot listed. FOMO: ${slotsLeft} advertiser slots remain. Your content now monetizes.`);
@@ -770,7 +768,7 @@ function renderPublisherSlots() {
   if (!container) return;
   container.innerHTML = '<h4>Your Active Slots (Idle + FOMO earnings)</h4>';
   if (publisherSlots.length === 0) {
-    container.innerHTML += '<p>No slots. List from p8 Eden drops or p9 lives for passive $EROS.</p>';
+    container.innerHTML += '<p>No slots. List from your content or live sessions for passive Credits.</p>';
     return;
   }
   publisherSlots.forEach(s => {
@@ -785,41 +783,38 @@ function renderPublisherSlots() {
   });
 }
 
-// === NIOBE BIRTH: X Virality (x-virality + full psych cheat) ===
+// === Share to X ===
 function shareOnX() {
   const sampleAd = ads[0] || { title: 'Your Voice Ad', surprise: 0.71, impressions: 12400 };
-  const copy = `AdForge p16: ${sampleAd.title} hit ${sampleAd.impressions} imps with p6 Surprise ${sampleAd.surprise.toFixed(2)}.
+  const copy = `AdForge: ${sampleAd.title} reached ${sampleAd.impressions} impressions with voice resonance ${sampleAd.surprise.toFixed(2)}.
 
-Founding advertisers window open — p12 idea ads + p8/p9 inventory.
+Voice-driven ad creatives, live auctions, and idea + metaverse inventory.
 
-Dalio cycle: extract NOW before the next empire shift.
-Variable ratio voice creatives. Near-miss slots.
+Build your campaign on AdForge.
 
-MY Ad Empire starts here. p16.
+Fictional simulation. 18+ only. Rates & limits shown in-app.
 
-Fictional. 18+ only. Rates & limits in-app.
-
-#Web3Ads #LegionOne`;
+#Web3Ads`;
 
   navigator.clipboard.writeText(copy).then(() => {
-    alert('🐦 X viral copy copied (Niobe cheat: narrative + FOMO + variable + endowment + cycle). Post it. K-factor ignition.');
-    addToCodex('X viral thread fired for ad campaign. UGC seed planted.');
+    alert('🐦 Share copy copied. Post it to spread your campaign.');
+    addToCodex('Share copy generated for your campaign.');
   }).catch(() => {
-    prompt('Copy this X thread:', copy);
+    prompt('Copy this post:', copy);
   });
 }
 
-// === NIOBE BIRTH: Live Auction FOMO ===
+// === Live Auction ===
 function joinLiveAuction() {
   if (!wallet) { alert('Connect wallet.'); return; }
   const bid = 80 + Math.floor(Math.random() * 70);
-  if (credits < bid) { alert('Need more Credits (p10).'); return; }
+  if (credits < bid) { alert('Need more Credits (Credits).'); return; }
   credits -= bid;
   slotsLeft = Math.max(3, slotsLeft - 2);
   updateWallet();
   updateFomoDisplays();
-  addToCodex(`Joined p9 live auction. Spent ${bid}. Near-miss premium slot secured.`);
-  alert(`🔥 Live bid won! ${bid} Credits. ${slotsLeft} slots left. p9 viewers + voice surprise = variable reach explosion.`);
+  addToCodex(`Joined live auction. Spent ${bid}. Near-miss premium slot secured.`);
+  alert(`🔥 Live bid won! ${bid} Credits. ${slotsLeft} slots left. viewers + voice resonance lift reach.`);
 }
 
 // Enhanced FOMO + psych in core actions
@@ -832,14 +827,14 @@ function enhanceFomoOnAction(ad) {
 
 function updateWallet() {
   const el = document.getElementById('wallet-info');
-  if (el) el.innerHTML = `${wallet || '0xDemo'} • ${balance} $EROS / ${credits} AdFuel (p10)`;
+  if (el) el.innerHTML = `${wallet || '0xDemo'} • ${credits} Credits`;
 }
 
 // === ON-CHAIN + CROSS BIRTHS (p16 web3) ===
 function mintNFTSlot(type='banner', minPrice=80) {
   if (!wallet) { alert('Connect wallet'); return; }
   const dep = Math.floor(minPrice*0.6);
-  if (credits < dep) { alert('p10 AdFuel deposit needed'); return; }
+  if (credits < dep) { alert('Credits deposit needed'); return; }
   credits -= dep;
   const slot = {id:Date.now(), owner:wallet, type, minPrice, deposit:dep, performance:0.5+Math.random()*0.4, ts:Date.now()};
   nftSlots.unshift(slot);
@@ -858,7 +853,7 @@ function placeBid(aucId) {
   const a = auctions.find(x=>x.id==aucId); if(!a||a.settled) return;
   const v = window._p16Voice ? (window._p16Voice.surprise||0.5) : 0.5;
   const b = Math.floor(a.currentPrice*0.87);
-  if (credits < b) return alert('p10 low');
+  if (credits < b) return alert('Not enough Credits');
   credits -= b;
   const eff = Math.floor(b * (1+(v-0.5)*0.32));
   a.bids.push({bidder:wallet, amount:b, effective:eff, voice:v});
@@ -872,16 +867,16 @@ function settleAuction(aucId) {
   const s = nftSlots.find(x=>x.id==a.slotId); if(!s) return;
   const fee = Math.floor(w.amount * 0.01);
   s.owner = w.bidder; a.settled=true; a.winner=w.bidder; a.final=w.amount; a.fee=fee;
-  if (s.type.includes('metaverse')) { p11Aura['p11']= (p11Aura['p11']||1) + w.voice*0.65; localStorage.setItem('p11_aura',JSON.stringify(p11Aura)); }
+  if (s.type.includes('metaverse')) { metaverseAura['meta']= (metaverseAura['meta']||1) + w.voice*0.65; localStorage.setItem('p16_meta_aura',JSON.stringify(metaverseAura)); }
   localStorage.setItem('p16_nftSlots', JSON.stringify(nftSlots));
   localStorage.setItem('p16_auctions', JSON.stringify(auctions));
   addToCodex(`Settled. Fee ${fee} (1%).`); showAuctions();
 }
-function crossP9LiveAuction() { crossP11Metaverse(); alert('p9 live ad overlay auction synced (cross birth).'); }
+function crossP9LiveAuction() { crossP11Metaverse(); alert('live ad overlay auction synced.'); }
 function crossP11Metaverse() {
-  const slot = {id:Date.now(), owner:wallet||'0xDemo', type:'metaverse-billboard', minPrice:150, performance:0.75+(p11Aura['p11']||0)*0.1};
+  const slot = {id:Date.now(), owner:wallet||'0xDemo', type:'metaverse-billboard', minPrice:150, performance:0.75+(metaverseAura['meta']||0)*0.1};
   nftSlots.unshift(slot); localStorage.setItem('p16_nftSlots', JSON.stringify(nftSlots));
-  addToCodex('p11 Metaverse billboard NFT attached + AuraCarry');
+  addToCodex('Metaverse billboard NFT attached + value carry');
   showNFTSlots();
 }
 
@@ -891,29 +886,29 @@ function initP16() {
   // Seed demo ads
   if (ads.length === 0) {
     ads = [
-      { id: 1, title: "p15 Beauty Launch", desc: "Voice-optimized beauty ads.", budget: 800, spent: 320, impressions: 4500, surprise: 0.72, voiceUrl: null, timestamp: new Date().toISOString(), target: "Beauty, Women", owner: "demo" },
-      { id: 2, title: "p11 Metaverse Land", desc: "Web3 metaverse promo.", budget: 1200, spent: 550, impressions: 12000, surprise: 0.65, voiceUrl: null, timestamp: new Date().toISOString(), target: "Web3, Crypto", owner: "demo" }
+      { id: 1, title: "Beauty Launch", desc: "Voice-optimized beauty ads.", budget: 800, spent: 320, impressions: 4500, surprise: 0.72, voiceUrl: null, timestamp: new Date().toISOString(), target: "Beauty, Women", owner: "demo" },
+      { id: 2, title: "Metaverse Land", desc: "Web3 metaverse promo.", budget: 1200, spent: 550, impressions: 12000, surprise: 0.65, voiceUrl: null, timestamp: new Date().toISOString(), target: "Web3, Crypto", owner: "demo" }
     ];
     localStorage.setItem('p16_ads', JSON.stringify(ads));
   }
   // Adult demo seed (gated)
   if (!ads.find(a => a.adult)) {
-    ads.push({ id: 77, title: "p9 Eros Veil Drop", desc: "Adult creative voice ad.", budget: 650, spent: 90, impressions: 2100, surprise: 0.81, voiceUrl: null, timestamp: new Date().toISOString(), target: "Adult 18+", owner: "demo", adult: true });
+    ads.push({ id: 77, title: "Adult Creative Drop", desc: "Adult creative voice ad.", budget: 650, spent: 90, impressions: 2100, surprise: 0.81, voiceUrl: null, timestamp: new Date().toISOString(), target: "Adult 18+", owner: "demo", adult: true });
     localStorage.setItem('p16_ads', JSON.stringify(ads));
   }
   
-  // p6 cross
+  // voice integration
   if (window.getP6LungSurprise) {
-    console.log('[p16] p6 Lung Surprise Eye ready for ad creatives.');
+    console.log('[AdForge] voice resonance ready for ad creatives.');
   }
   
-  // Birth retention hook + demo seeds
+  // demo seeds
   simulateIdleEarnings();
   updateFomoDisplays();
   
   // Seed demo metaverse/idea cross for prototype
   if (!localStorage.getItem('p16_birth_demo')) {
-    ads.push({ id: 9991, title: "p11 Billboard Ritual", desc: "Metaverse live ad.", budget: 1100, spent: 410, impressions: 13400, surprise: 0.69, timestamp: new Date().toISOString(), target: "Metaverse" });
+    ads.push({ id: 9991, title: "Metaverse Billboard", desc: "Metaverse live ad.", budget: 1100, spent: 410, impressions: 13400, surprise: 0.69, timestamp: new Date().toISOString(), target: "Metaverse" });
     localStorage.setItem('p16_ads', JSON.stringify(ads));
     localStorage.setItem('p16_birth_demo', '1');
   }
@@ -937,12 +932,12 @@ function initP16() {
     localStorage.setItem('p16_auctions', JSON.stringify(auctions));
   }
 
-  // p6 Voice Expert seed: ensure live voice cross + p9 synergy
+  // Voice seed: ensure a live voice ad exists
   if (!ads.some(a => a.p9Cross || a.live)) {
-    ads.unshift({id: 20260713, title:'p6×p9 Voice Live Seed', desc:'Birth: artistic voice powers live ad.', budget:380, spent:90, impressions:5100, surprise:0.71, live:true, p9Cross:true, viewers:51, seatsLeft:6, timestamp:new Date().toISOString()});
+    ads.unshift({id: 20260713, title:'Live Voice Ad', desc:'Your voice powers a live ad.', budget:380, spent:90, impressions:5100, surprise:0.71, live:true, p9Cross:true, viewers:51, seatsLeft:6, timestamp:new Date().toISOString()});
     localStorage.setItem('p16_ads', JSON.stringify(ads));
   }
-  console.log('%c[p16 p6 Voice Expert] births active: VoiceForge + Analyst + LiveCross + Meter + Seeds. Legion one.', 'color:#c5a46e');
+  console.log('%c[AdForge] Voice Studio + Analyst + Live Cross + Meter + Seeds ready.', 'color:#c5a46e');
 }
 
 function updateFomoDisplays() {
@@ -955,7 +950,7 @@ function updateFomoDisplays() {
   if (live) live.textContent = `Live product demo ad • ${Math.floor(Math.random()*80)+120} watching • ${slotsLeft-12} slots left`;
 }
 function joinLiveAuction() { igniteRitual(); } // alias for existing button
-// (full Niobe births above — stubs removed to preserve p12/publisher/X/psych tactics)
+
 
 function simulateIdleEarnings() {
   // Psych retention: loss aversion + endowment for publishers/advertisers
@@ -970,19 +965,19 @@ function simulateIdleEarnings() {
     credits += earned;
     localStorage.setItem('p16_publisher_slots', JSON.stringify(publisherSlots));
     if (earned > 0) {
-      addToCodex(`While away (${hoursAway}h): earned ${earned} Credits from p8/p9 slots. Come back for more.`);
+      addToCodex(`While away (${hoursAway}h): earned ${earned} Credits from publisher slots. Come back for more.`);
     }
   }
   localStorage.setItem('p16_last_visit', Date.now());
   updateWallet();
 }
 
-// === p6 Voice Expert Births (integrated) ===
-// VoiceForge artistic voice-over
+// === Voice Studio Births (integrated) ===
+// Voice Studio artistic voice-over
 function recordVoiceOver() {
   const el = document.getElementById('voiceforge-preview') || document.getElementById('voice-preview');
-  if (!el) return alert('Open VoiceForge section');
-  el.innerHTML = 'p6 VoiceForge: Capturing artistic voice-over (sfumato + lung surprise)...';
+  if (!el) return alert('Open Voice Studio section');
+  el.innerHTML = 'voice Studio: Capturing your voice-over...';
   navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
     const rec = new MediaRecorder(stream); let chunks=[];
     rec.ondataavailable = e=>chunks.push(e.data);
@@ -996,21 +991,21 @@ function recordVoiceOver() {
       stream.getTracks().forEach(t=>t.stop());
     };
     rec.start(); setTimeout(()=>rec.stop(), 4800);
-  }).catch(()=>{ window._p16VoiceOver={surprise:0.71,insight:'ache voiceover'}; birthVoiceSeed('voiceover',0.71); el.innerHTML='VoiceOver ready (p6 expert).'; });
+  }).catch(()=>{ window._p16VoiceOver={surprise:0.71,insight:"voice tone"}; birthVoiceSeed('voiceover',0.71); el.innerHTML='Voice-over ready.'; });
 }
 
 // Voice Analyst — performance analysis via voice
 function analyzeAdPerformanceWithVoice(adId) {
   const ad = ads.find(a=>a.id===adId); if(!ad) return;
   const el = document.getElementById('analyst-preview') || document.getElementById('voice-preview');
-  if (el) el.innerHTML = 'p6 Voice Analyst: Speak performance observation...';
+  if (el) el.innerHTML = 'Voice Analyst: Speak performance observation...';
   navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
     const rec=new MediaRecorder(stream); let chunks=[];
     rec.ondataavailable=e=>chunks.push(e.data);
     rec.onstop=()=>{
       const s=(window.getP6LungSurprise&&window.getP6LungSurprise())||(0.42+Math.random()*0.48);
       const rep = buildPerformanceReport(ad); // REAL data-driven report
-      if(el) el.innerHTML = `<div style="font-size:11px">${rep.html}<br><span style="color:#c5a46e">👁 p6 voice resonance ${s.toFixed(2)} layered on the data above.</span></div>`;
+      if(el) el.innerHTML = `<div style="font-size:11px">${rep.html}<br><span style="color:#c5a46e">👁 voice resonance ${s.toFixed(2)} layered on the data above.</span></div>`;
       addToCodex(`Perf report • ${ad.title}: ${rep.verdict} — CTR ${(rep.ctr*100).toFixed(2)}% vs bench ${(rep.benchmark*100).toFixed(2)}%, CPC ${rep.cpc}, ${rep.reachPct}% reach used.`);
       ad.voiceAnalysis={surprise:s, verdict:rep.verdict, ctr:rep.ctr, cpc:rep.cpc, ts:Date.now()};
       localStorage.setItem('p16_ads',JSON.stringify(ads));
@@ -1067,36 +1062,36 @@ function buildPerformanceReport(ad) {
 }
 
 function p6VoiceExpertInsight(surprise){
-  if(surprise>0.78) return 'Mycelial glaze. Variable weaponized. Scale.';
-  if(surprise>0.55) return 'Sfumato ache + breath. Near-miss resonance.';
-  return 'Lung mirror. Re-listen. Nurture FOMO.';
+  if(surprise>0.78) return 'Strong, expressive voice — great for scaling this campaign.';
+  if(surprise>0.55) return 'Warm tone with good resonance — solid creative.';
+  return 'Flat delivery — try re-recording with more energy.';
 }
 
 function birthVoiceSeed(type,surprise,ref=null){
-  const seed={id:Date.now(),type,surprise:parseFloat(surprise.toFixed(3)),ref,ts:Date.now(),for:'legion p9/p6/p1'};
+  const seed={id:Date.now(),type,surprise:parseFloat(surprise.toFixed(3)),ref,ts:Date.now(),source:'adforge-voice'};
   voiceSeeds.unshift(seed); if(voiceSeeds.length>18)voiceSeeds.length=18;
   localStorage.setItem('p16_voiceSeeds',JSON.stringify(voiceSeeds));
   try{localStorage.setItem('p16_voiceSeedExport',JSON.stringify(seed));}catch(e){}
   if(window.p6DistributedVitruvianLung) window.p6DistributedVitruvianLung({surprise});
 }
 
-// p9 Live Voice Ad Cross birth
+// Live Voice Ad
 function launchLiveVoiceAdCross(){
   if(!wallet){alert('Connect wallet');return;}
   const s=(window.getP6LungSurprise&&window.getP6LungSurprise())||0.61;
-  const ad={id:Date.now(),title:'p9×p6 Live Voice • '+(document.getElementById('ad-title')?.value||'Breath Drop'),desc:'Live voice ad. p6 Lung + p9 Eye. FOMO.',budget:parseInt(document.getElementById('budget')?.value)||380,surprise:s,live:true,p9Cross:true,viewers:Math.floor(40+s*60),seatsLeft:9,voiceUrl:window._p16VoiceOver?.url||null,timestamp:new Date().toISOString()};
+  const ad={id:Date.now(),title:'Live Voice • '+(document.getElementById('ad-title')?.value||'Voice Drop'),desc:'Live voice ad with real-time viewer ratings.',budget:parseInt(document.getElementById('budget')?.value)||380,surprise:s,live:true,p9Cross:true,viewers:Math.floor(40+s*60),seatsLeft:9,voiceUrl:window._p16VoiceOver?.url||null,timestamp:new Date().toISOString()};
   ads.unshift(ad); localStorage.setItem('p16_ads',JSON.stringify(ads));
-  addToCodex(`p9 Live Voice Ad born • surprise ${s.toFixed(2)}`);
+  addToCodex(`Live Voice Ad created • resonance ${s.toFixed(2)}`);
   try{ const sp=JSON.parse(localStorage.getItem('p6_smileSpores')||'[]'); sp.unshift({planted:Date.now(),wound:0.48+(1-s)*0.4,seed:Math.random()*6.28,from:'p16-p9live',changbal:s>0.68}); localStorage.setItem('p6_smileSpores',JSON.stringify(sp.slice(0,7))); }catch(e){}
-  alert('p9 Live Voice Ad launched. Cross active.');
+  alert('Live Voice Ad launched. Cross active.');
   showLive();
 }
 
-// Voice Performance Meter (p6 lung eye for campaigns)
+// Voice Performance Meter (voice meter for campaigns)
 function startVoicePerformanceMeter(adId){
   const ad=ads.find(a=>a.id===adId); if(!ad)return;
   const m=document.createElement('div'); m.className='voice-meter';
-  m.innerHTML=`<div style="font-size:11px">👁 p6 Meter • ${ad.title}</div><div class="bar" style="height:6px;background:#3a3124;margin:4px 0"><div id="vmf" style="height:100%;width:0%;background:#c5a46e"></div></div><span id="vmv" style="font-size:10px">0.00</span>`;
+  m.innerHTML=`<div style="font-size:11px">👁 Voice Meter • ${ad.title}</div><div class="bar" style="height:6px;background:#3a3124;margin:4px 0"><div id="vmf" style="height:100%;width:0%;background:#c5a46e"></div></div><span id="vmv" style="font-size:10px">0.00</span>`;
   (document.getElementById('inventory-list')||document.body).appendChild(m);
   const f=document.getElementById('vmf'),v=document.getElementById('vmv');
   const iv=setInterval(()=>{
@@ -1109,12 +1104,12 @@ function startVoicePerformanceMeter(adId){
 
 function showVoiceForge(){
   hideAll();
-  const sec = document.getElementById('voiceforge') || createVoiceSection('voiceforge','VoiceForge • p6 Artistic Voice-Overs');
-  sec.innerHTML = `<h2>VoiceForge (p6 Expert)</h2>
+  const sec = document.getElementById('voiceforge') || createVoiceSection('voiceforge','Voice Studio • Artistic Voice-Overs');
+  sec.innerHTML = `<h2>Voice Studio (Voice Studio)</h2>
   <button onclick="recordVoiceOver()">🎙️ Record Voice Over</button>
   <div id="voiceforge-preview" style="margin:8px 0;font-size:12px"></div>
   <button onclick="applyVoiceOverToLatest()">Apply VoiceOver to Latest Ad</button>
-  <small>p6 Lung + sfumato + surprise → ad creative. Cross p9 live.</small>`;
+  <small>Record a voice-over to power your ad creative.</small>`;
   sec.classList.remove('hidden');
 }
 
@@ -1124,7 +1119,7 @@ function showVoiceAnalyst(){
   let html = `<h2>Voice Analyst (p6)</h2><div id="analyst-preview"></div>`;
   const recent = ads.slice(0,4);
   recent.forEach(a=>{ html += `<div class="ad-card"><strong>${a.title}</strong> <button onclick="analyzeAdPerformanceWithVoice(${a.id});startVoicePerformanceMeter(${a.id})">Speak Analysis + Meter</button></div>`; });
-  html += `<small>Record voice → p6 surprise rates performance. ALWAYS LEARNING mutates ad.</small>`;
+  html += `<small>Record voice → resonance rates performance. ALWAYS LEARNING mutates ad.</small>`;
   sec.innerHTML=html; sec.classList.remove('hidden');
 }
 
@@ -1138,7 +1133,7 @@ function applyVoiceOverToLatest(){
   const ad=ads[0]; ad.voiceOver = window._p16VoiceOver; ad.surprise = Math.max(ad.surprise||0.3, window._p16VoiceOver.surprise);
   localStorage.setItem('p16_ads',JSON.stringify(ads));
   addToCodex(`VoiceOver grafted to ${ad.title}`);
-  alert('Voice-over applied. p6 artistic now in ad.');
+  alert('Voice-over applied. voice creative now in ad.');
   showInventory();
 }
 
@@ -1147,12 +1142,12 @@ function applyVoiceOverToLatest(){
 function showPsych() {
   hideAll();
   document.getElementById('psych').classList.remove('hidden');
-  LilithPsych.updateResonance();
+  Engagement.updateResonance();
   // Live update psych stats
   const f = document.getElementById('fomo-val');
   const v = document.getElementById('var-val');
-  if (f) f.textContent = Math.floor(74 + LilithPsych.resonance * 24);
-  if (v) v.textContent = (1.9 + LilithPsych.resonance * 1.4).toFixed(1) + 'x';
+  if (f) f.textContent = Math.floor(74 + Engagement.resonance * 24);
+  if (v) v.textContent = (1.9 + Engagement.resonance * 1.4).toFixed(1) + 'x';
 }
 
 function showVault() {
@@ -1160,148 +1155,137 @@ function showVault() {
   document.getElementById('vault').classList.remove('hidden');
   const list = document.getElementById('vault-list');
   list.innerHTML = '';
-  if (LilithPsych.ownedSlots.length === 0) {
+  if (Engagement.ownedSlots.length === 0) {
     list.innerHTML = '<p>No owned slots yet. Bid & win to claim endowment.</p>';
     return;
   }
-  LilithPsych.ownedSlots.forEach(slot => {
+  Engagement.ownedSlots.forEach(slot => {
     const el = document.createElement('div');
     el.className = 'ad-card vault-card';
     el.innerHTML = `
       <strong>🔒 ${slot.title}</strong><br>
-      <small>Claimed • Imps: ${slot.impressions || 0} • Protection ${slot.protection ? slot.protection.toFixed(1) : '1.0'}x</small><br>
-      <div class="fomo">MY SLOT — Loss aversion active. Do not let go.</div>
-      <button onclick="claimDailySurprise(${slot.id})">Claim Surprise Yield (Variable)</button>
+      <small>Owned • Imps: ${slot.impressions || 0} • Protection ${slot.protection ? slot.protection.toFixed(1) : '1.0'}x</small><br>
+      <div class="fomo">Your slot — saved to Vault.</div>
+      <button onclick="claimDailySurprise(${slot.id})">Claim Bonus</button>
     `;
     list.appendChild(el);
   });
 }
 
 function protectSlot() {
-  if (LilithPsych.ownedSlots.length === 0) return alert('Claim slots first.');
+  if (Engagement.ownedSlots.length === 0) return alert('Claim slots first.');
   const cost = 35;
   if (credits < cost) return alert('Need Credits to protect.');
   credits -= cost;
-  LilithPsych.ownedSlots.forEach(s => s.protection = (s.protection || 1) + 0.4);
-  localStorage.setItem('p16_owned_slots', JSON.stringify(LilithPsych.ownedSlots));
+  Engagement.ownedSlots.forEach(s => s.protection = (s.protection || 1) + 0.4);
+  localStorage.setItem('p16_owned_slots', JSON.stringify(Engagement.ownedSlots));
   updateWallet();
-  addToCodex('Endowment protection purchased. Loss aversion reinforced.');
+  addToCodex('Slot protection purchased.');
   showVault();
 }
 
 function claimDailySurprise(id) {
-  const slot = LilithPsych.ownedSlots.find(s => s.id === id);
+  const slot = Engagement.ownedSlots.find(s => s.id === id);
   if (!slot) return;
-  LilithPsych.updateResonance();
-  const yieldAmt = LilithPsych.variableRatio(60 + Math.floor((slot.impressions || 800) * 0.03), true);
+  Engagement.updateResonance();
+  const yieldAmt = Engagement.variableRatio(60 + Math.floor((slot.impressions || 800) * 0.03), true);
   credits += yieldAmt;
-  LilithPsych.saveStreak();
+  Engagement.saveStreak();
   updateWallet();
-  addToCodex(`Surprise Yield ${yieldAmt} from ${slot.title}. Streak ${LilithPsych.streak}. Retention locked.`);
-  alert(`Variable payout: +${yieldAmt} Credits. p6 Resonance amplified.`);
+  addToCodex(`Bonus ${yieldAmt} from ${slot.title}. Streak ${Engagement.streak}. `);
+  alert(`Bonus payout: +${yieldAmt} Credits.`);
   showVault();
 }
 
 function shareVictory() {
-  if (!ads.length && !LilithPsych.ownedSlots.length) return alert('Create or own a campaign first.');
-  LilithPsych.updateResonance();
-  const winAd = LilithPsych.ownedSlots[0] || ads[0];
-  const echo = `AdForge p16 Victory Echo (Fictional):
-${winAd.title} — ${winAd.impressions} imps • p6 Voice Resonance ${LilithPsych.resonance.toFixed(2)}
-FOMO crushed. Variable ratio paid. Near-miss survived. Endowment locked.
+  if (!ads.length && !Engagement.ownedSlots.length) return alert('Create or own a campaign first.');
+  Engagement.updateResonance();
+  const winAd = Engagement.ownedSlots[0] || ads[0];
+  const echo = `AdForge campaign result (fictional):
+${winAd.title} — ${winAd.impressions} impressions • voice resonance ${Engagement.resonance.toFixed(2)}
 
-Founding advertisers: limited slots. Creators list now for earnings.
-p6 voice turns performance into legend.
+Voice-driven creatives, live auctions, and idea + metaverse inventory.
 
-Legion one. 18+ fictional. No real value. Rates disclosed in UI.
-
-Share this echo. Virality birth.`;
+Fictional simulation. 18+ only. No real value. Rates shown in-app.`;
 
   navigator.clipboard.writeText(echo).then(() => {
-    // Virality birth: simulate network effect
-    const bonus = Math.floor(120 * LilithPsych.getResonanceMult());
+    const bonus = Math.floor(120 * Engagement.getResonanceMult());
     credits += bonus;
     updateWallet();
-    addToCodex(`Victory Echo shared. +${bonus} Credits network. Virality + retention cycle.`);
-    // Cross to p9 live + p11 + p20/21 if fate synergy
-    try { localStorage.setItem('p16_ad_to_p9', JSON.stringify({echo, surprise:LilithPsych.resonance, ts:Date.now()})); localStorage.setItem('p16_ad_to_p11', JSON.stringify({aura:'ad', ts:Date.now()})); } catch(e){}
-    alert('p6 Victory Echo copied. +Network bonus. Virality ignited. p9 live + p11 seeded.');
-  }).catch(() => prompt('Copy echo:', echo));
+    addToCodex(`Campaign result shared. +${bonus} Credits.`);
+    alert('Campaign result copied. +Network bonus.');
+  }).catch(() => prompt('Copy result:', echo));
 }
 
 function triggerPsychSurge() {
-  LilithPsych.updateResonance();
-  LilithPsych.lastSurge = Date.now();
-  const surge = 1.4 + LilithPsych.resonance;
+  Engagement.updateResonance();
+  Engagement.lastSurge = Date.now();
+  const surge = 1.4 + Engagement.resonance;
   ads.forEach(ad => {
     ad.impressions = Math.floor((ad.impressions || 300) * surge);
-    LilithPsych.applyFomo(ad);
+    Engagement.applyFomo(ad);
   });
-  if (LilithPsych.ownedSlots.length) {
-    LilithPsych.ownedSlots.forEach(s => s.impressions = Math.floor((s.impressions||400)*surge));
+  if (Engagement.ownedSlots.length) {
+    Engagement.ownedSlots.forEach(s => s.impressions = Math.floor((s.impressions||400)*surge));
   }
   localStorage.setItem('p16_ads', JSON.stringify(ads));
-  localStorage.setItem('p16_owned_slots', JSON.stringify(LilithPsych.ownedSlots));
-  addToCodex(`Lilith Psych Surge ignited. Resonance ${LilithPsych.resonance.toFixed(2)}. All hooks *${surge.toFixed(1)}.`);
-  alert(`SURGE: All performance *${surge.toFixed(1)}. FOMO + VR + near-miss + loss + endowment maxed.`);
+  localStorage.setItem('p16_owned_slots', JSON.stringify(Engagement.ownedSlots));
+  addToCodex(`Engagement refreshed. Resonance ${Engagement.resonance.toFixed(2)}. Performance x${surge.toFixed(1)}.`);
+  alert(`Engagement refreshed. All campaign performance x${surge.toFixed(1)} (simulated).`);
   showInventory();
 }
 
-// Creator side: list inventory with psych hooks (endowment for creators too)
+// Creator side: list inventory to the Vault
 function listCreatorInventory() {
-  // Called from showInventory context or new button. Creators feel endowment on high-value listings.
   if (!wallet) return;
-  const slot = { id: Date.now(), title: 'My Creator Premium Slot #' + (Math.floor(Math.random()*99)), impressions: 2100, surprise: LilithPsych.resonance || 0.6, owned: true };
-  LilithPsych.claimEndowment(slot); // Creators also get endowment
-  addToCodex(`Creator listed slot with endowment. FOMO + variable earnings armed.`);
-  alert('Creator slot listed. Now feels like yours (endowment). Bids will trigger FOMO.');
+  const slot = { id: Date.now(), title: 'My Creator Premium Slot #' + (Math.floor(Math.random()*99)), impressions: 2100, surprise: Engagement.resonance || 0.6, owned: true };
+  Engagement.claimEndowment(slot);
+  addToCodex(`Creator slot listed. Variable earnings active.`);
+  alert('Creator slot listed and saved to your Vault.');
   showVault();
 }
 
 function showP11() { hideAll(); document.getElementById('metaverse').classList.remove('hidden'); }
 function showP12() { hideAll(); document.getElementById('ideas').classList.remove('hidden'); }
 
-// Inject Lilith into live auction for near-miss + variable
 function renderLiveVoiceAds() {
   const live = document.getElementById('live');
   if (!live) return;
-  live.innerHTML = `<h2>p9 Live Ad Auction — Near-Miss + Variable (Lilith)</h2>
-    <div class="live-item">🔥 ${Math.floor(140 + LilithPsych.resonance*60)} watching • Variable payout window open</div>
-    <button onclick="joinLiveAuctionLilith()">Join Auction (FOMO + Near-Miss Risk)</button>
-    <button onclick="listCreatorInventory()">List My Creator Slot (Endowment Birth)</button>`;
+  live.innerHTML = `<h2>Live Ad Auction</h2>
+    <div class="live-item">🔥 ${Math.floor(140 + Engagement.resonance*60)} watching • Auction window open</div>
+    <button onclick="joinLiveAuctionLilith()">Join Auction</button>
+    <button onclick="listCreatorInventory()">List My Creator Slot</button>`;
 }
 
 function joinLiveAuctionLilith() {
   if (!wallet) { alert('Connect wallet.'); return; }
-  LilithPsych.updateResonance();
+  Engagement.updateResonance();
   const base = 95 + Math.floor(Math.random()*55);
-  const bid = LilithPsych.variableRatio(base);
+  const bid = Engagement.variableRatio(base);
   if (credits < bid) { alert('Need Credits.'); return; }
   credits -= bid;
-  const miss = LilithPsych.simulateNearMiss(bid, true);
+  const miss = Engagement.simulateNearMiss(bid, true);
   slotsLeft = Math.max(2, slotsLeft-1);
   updateWallet();
   updateFomoDisplays();
-  addToCodex(`Live auction: ${bid} spent. Near ${miss}. Res ${LilithPsych.resonance.toFixed(2)}.`);
-  alert(`Live won ${bid}! Near-miss survived. Resonance active.`);
+  addToCodex(`Live auction: ${bid} spent. Res ${Engagement.resonance.toFixed(2)}.`);
+  alert(`Live auction won for ${bid} Credits.`);
 }
 
 // Patch existing joinLiveAuction if called
 const _oldJoin = window.joinLiveAuction;
 window.joinLiveAuction = joinLiveAuctionLilith;
 
-// (globals declared at top — Niobe p16 birth)
-
-// p16 on-chain stubs (web3 birth)
+// on-chain stubs (web3 simulation)
 if (typeof showNFTSlots !== 'function') { window.showNFTSlots = () => { hideAll(); document.getElementById('inventory').classList.remove('hidden'); const l = document.getElementById('inventory-list'); l.innerHTML = '<h3>AdSlot NFTs</h3>'; (nftSlots||[]).forEach(s => { const d = document.createElement('div'); d.className='ad-card'; d.innerHTML = `#${s.id} ${s.type} min${s.minPrice}<button onclick="startDutchAuction(${s.id})">Dutch</button>`; l.appendChild(d); }); }; }
-if (typeof showAuctions !== 'function') { window.showAuctions = () => { hideAll(); document.getElementById('inventory').classList.remove('hidden'); const l = document.getElementById('inventory-list'); l.innerHTML = '<h3>On-Chain Auctions</h3>'; (auctions||[]).forEach(a => { const d = document.createElement('div'); d.className='ad-card'; d.innerHTML = `Auc${a.id} @${a.currentPrice} ${a.settled?'done':''}<button onclick="placeBid(${a.id})">p10+VoiceForge</button>`; l.appendChild(d); }); }; }
-if (typeof crossP11Metaverse !== 'function') { window.crossP11Metaverse = () => { const s = {id:Date.now(),owner:wallet||'0xDemo',type:'metaverse-billboard',minPrice:155}; (window.nftSlots = nftSlots||[]).unshift(s); localStorage.setItem('p16_nftSlots',JSON.stringify(nftSlots)); alert('p11 cross metaverse NFT + Aura'); showNFTSlots(); }; }
+if (typeof showAuctions !== 'function') { window.showAuctions = () => { hideAll(); document.getElementById('inventory').classList.remove('hidden'); const l = document.getElementById('inventory-list'); l.innerHTML = '<h3>On-Chain Auctions</h3>'; (auctions||[]).forEach(a => { const d = document.createElement('div'); d.className='ad-card'; d.innerHTML = `Auc${a.id} @${a.currentPrice} ${a.settled?'done':''}<button onclick="placeBid(${a.id})">Bid</button>`; l.appendChild(d); }); }; }
+if (typeof crossP11Metaverse !== 'function') { window.crossP11Metaverse = () => { const s = {id:Date.now(),owner:wallet||'0xDemo',type:'metaverse-billboard',minPrice:155}; (window.nftSlots = nftSlots||[]).unshift(s); localStorage.setItem('p16_nftSlots',JSON.stringify(nftSlots)); alert('Metaverse NFT slot added.'); showNFTSlots(); }; }
 
 window.onload = function() {
   initP16();
-  // Lilith birth: seed one endowment demo if none
-  if (LilithPsych.ownedSlots.length === 0 && ads.length > 0) {
-    LilithPsych.claimEndowment(ads[0]);
+  // seed one owned-slot demo if none
+  if (Engagement.ownedSlots.length === 0 && ads.length > 0) {
+    Engagement.claimEndowment(ads[0]);
   }
-  LilithPsych.updateResonance();
+  Engagement.updateResonance();
 };

@@ -1,3 +1,3 @@
-// p16 AdForge PWA service worker stub
+// AdForge PWA service worker stub
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('fetch', () => {});
