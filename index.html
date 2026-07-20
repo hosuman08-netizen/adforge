@@ -37,22 +37,32 @@
       </div>
 
       <div class="nav">
-        <button onclick="showCreate()" class="primary">✍️ Create Ad</button>
-        <button onclick="showInventory()">📦 Inventory</button>
-        <button onclick="showLive()">📡 Live</button>
-        <button onclick="showAuctions()">🔨 Auctions</button>
-        <button onclick="showNFTSlots()">🪙 NFT Slots</button>
-        <button onclick="showPublisher()">🏪 Publisher</button>
-        <button onclick="showVault()">🏦 Vault</button>
-        <button onclick="showPsych()">📈 Engagement</button>
-        <button onclick="showSubs()">💎 Plans</button>
-        <button onclick="showCodex()">📓 Activity</button>
+        <button onclick="showCampaigns()" class="primary">🚀 Campaigns</button>
+        <button onclick="showDashboard()">📊 Performance</button>
+        <button onclick="showAudiences()">👥 Audiences</button>
+        <button onclick="showExperiments()">🧪 Experiments</button>
+        <button onclick="showCreate()">🎙 Creative</button>
       </div>
+      <details class="nav-more">
+        <summary>Web3 & more ▾</summary>
+        <div class="nav nav-secondary">
+          <button onclick="showInventory()">📦 Inventory</button>
+          <button onclick="showLive()">📡 Live</button>
+          <button onclick="showAuctions()">🔨 Auctions</button>
+          <button onclick="showNFTSlots()">🪙 NFT Slots</button>
+          <button onclick="showPublisher()">🏪 Publisher</button>
+          <button onclick="showVault()">🏦 Vault</button>
+          <button onclick="showPsych()">📈 Engagement</button>
+          <button onclick="showSubs()">💎 Plans</button>
+          <button onclick="showCodex()">📓 Activity</button>
+        </div>
+      </details>
     </header>
 
     <!-- Create Ad -->
-    <div id="create" class="section">
-      <h2>Create Web3 Ad</h2>
+    <div id="create" class="section hidden">
+      <h2>Voice Creative Studio</h2>
+      <p class="note" style="margin:-6px 0 10px">Record a voice-over, then attach it to any ad in your campaign. This standalone quick-ad also works.</p>
       <div class="form">
         <label>Ad Title</label>
         <input id="ad-title" placeholder="New product launch">
@@ -110,11 +120,13 @@
       <div class="note">Listed slots auto-match to relevant campaigns. Idle earnings simulate on load.</div>
     </div>
 
-    <!-- Campaigns -->
-    <div id="campaigns" class="section hidden">
-      <h2>My Campaigns</h2>
-      <div id="my-campaigns"></div>
-    </div>
+    <!-- Campaign Manager (rendered by admanager.js) -->
+    <div id="campaigns" class="section hidden"></div>
+    <div id="create-campaign" class="section hidden"></div>
+    <div id="audiences" class="section hidden"></div>
+    <div id="audience-builder" class="section hidden"></div>
+    <div id="dashboard" class="section hidden"></div>
+    <div id="experiments" class="section hidden"></div>
 
     <!-- Activity Log -->
     <div id="codex" class="section hidden">
@@ -183,6 +195,7 @@
   </footer>
 
   <script src="script.js"></script>
+  <script src="admanager.js"></script>
 <script>window.LEGION_APP='adforge';window.LEGION_ANALYTICS_URL='https://legion-analytics.hoyashi95.workers.dev';</script>
 <script src="legion-beacon.js"></script>
 </body>

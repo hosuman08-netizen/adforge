@@ -34,6 +34,13 @@ let fail=0;
 if(!fs.existsSync(ENTRY)){ console.log('⚪ 진입스크립트 없음('+ENTRY+') — 앱 조립 후 실행'); process.exit(0); }
 try{ vm.runInContext(fs.readFileSync(ENTRY,'utf8'),sb,{filename:ENTRY}); console.log('LOAD',ENTRY,'✅'); }
 catch(e){ fail++; console.log('LOAD ERROR',ENTRY,'❌',e.message,'\n',(e.stack||'').split('\n').slice(0,3).join('\n')); }
+// Also load companion modules (admanager.js) so the gate exercises them too.
+['admanager.js'].forEach(function(extra){
+  if(fs.existsSync(extra)){
+    try{ vm.runInContext(fs.readFileSync(extra,'utf8'),sb,{filename:extra}); console.log('LOAD',extra,'✅'); }
+    catch(e){ fail++; console.log('LOAD ERROR',extra,'❌',e.message,'\n',(e.stack||'').split('\n').slice(0,3).join('\n')); }
+  }
+});
 const T = `(function(){ var R=[];
   function tryFn(l,f){ try{ f(); R.push('✅ '+l); }catch(e){ R.push('❌ '+l+' — '+e.message); } }
   tryFn('window.onload(부팅)', function(){ if(typeof window.onload==='function') window.onload(); });

@@ -1055,10 +1055,14 @@ function initP16() {
     localStorage.setItem('p16_birth_demo', '1');
   }
   
-  // Show inventory (default view for advertisers)
+  // Campaign Manager is the primary surface (best-in-class ad-platform core).
+  if (window.AdManager && typeof window.AdManager.init === 'function') {
+    try { window.AdManager.init(); } catch (e) { console.warn('[AdForge] AdManager init', e); }
+  }
   setTimeout(() => {
-    document.getElementById('inventory').classList.remove('hidden');
-  }, 300);
+    if (typeof window.showCampaigns === 'function') { try { window.showCampaigns(); return; } catch (e) {} }
+    const inv = document.getElementById('inventory'); if (inv) inv.classList.remove('hidden');
+  }, 200);
 
   // === ON-CHAIN SEED (NFT + Dutch auction demo) ===
   if (nftSlots.length === 0) {
