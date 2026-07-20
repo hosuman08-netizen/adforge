@@ -1,3 +1,6 @@
+
+/* LEGION_WAVE_8_today_counter */
+try{var _dk=new Date().toDateString();var _o=JSON.parse(localStorage.getItem('lw_p16_web3_ad__today_counter')||'{}');if(_o.d!==_dk)_o={d:_dk,n:0};_o.n=(_o.n||0)+1;localStorage.setItem('lw_p16_web3_ad__today_counter',JSON.stringify(_o));}catch(e){}
 // AdForge — Voice Ad Platform (Web3 simulation)
 // Voice-driven: ad creation + voice-over + performance analysis
 // Live voice ads + real-time viewer ratings
