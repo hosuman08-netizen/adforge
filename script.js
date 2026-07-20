@@ -7,6 +7,46 @@
 let wallet = null;
 let credits = 920; // Credits (fictional virtual goods — simulated only, no real value)
 let ads = JSON.parse(localStorage.getItem('p16_ads') || '[]');
+
+function p16DayKey(off){const d=new Date();d.setDate(d.getDate()+(off||0));return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function bumpP16Day(kind){
+  try{
+    const t0=p16DayKey(0);
+    let st=JSON.parse(localStorage.getItem('p16_day_streak')||'{}');
+    if(st.last!==t0){
+      const y=p16DayKey(-1),y2=p16DayKey(-2);
+      if(st.last&&st.last!==y&&st.last===y2&&(st.count||0)>=3){
+        const ready=!st.shieldLast||((new Date(t0)-new Date(st.shieldLast))/86400000)>=7;
+        if(ready){st.shieldLast=t0;st.last=y;}
+      }
+      st.count=(st.last===y)?(st.count||0)+1:1; st.last=t0;
+      localStorage.setItem('p16_day_streak',JSON.stringify(st));
+      try{legionTrack('streak',{count:st.count})}catch(e){}
+    }
+    const k='p16_day_'+t0; let day=JSON.parse(localStorage.getItem(k)||'{"ads":0}');
+    if(kind==='ad') day.ads=(day.ads||0)+1;
+    localStorage.setItem(k,JSON.stringify(day));
+    renderP16Loop();
+  }catch(e){}
+}
+function renderP16Loop(){
+  try{
+    let el=document.getElementById('p16Loop');
+    if(!el){
+      el=document.createElement('div'); el.id='p16Loop';
+      el.style.cssText='margin:8px 0;padding:10px;border:1px solid #2a2438;border-radius:12px;font-size:12px;display:flex;flex-wrap:wrap;gap:8px';
+      const host=document.querySelector('header')||document.querySelector('h1')||document.body;
+      host.insertAdjacentElement('afterend', el);
+    }
+    const st=JSON.parse(localStorage.getItem('p16_day_streak')||'{}');
+    const day=JSON.parse(localStorage.getItem('p16_day_'+p16DayKey(0))||'{}');
+    const end=new Date(); end.setHours(24,0,0,0);
+    const ms=Math.max(0,end-Date.now());
+    const clock=Math.floor(ms/3600000)+'h '+Math.floor((ms%3600000)/60000)+'m';
+    el.innerHTML='🔥 '+(st.count||0)+'일 · 오늘 광고 '+(day.ads||0)+' · 총 '+(ads&&ads.length||0)+' · 리셋 '+clock+' · <span style="opacity:.7">시뮬 18+ · 실결제 아님</span>';
+  }catch(e){}
+}
+
 let campaigns = JSON.parse(localStorage.getItem('p16_campaigns') || '[]');
 let codex = JSON.parse(localStorage.getItem('p16_codex') || '[]');
 let publisherSlots = JSON.parse(localStorage.getItem('p16_publisher_slots') || '[]');
@@ -575,6 +615,7 @@ function createAd() {
 
   ads.unshift(ad);
   localStorage.setItem('p16_ads', JSON.stringify(ads));
+  try{bumpP16Day('ad');}catch(e){}
   if (window.legionTrack) window.legionTrack('activate');
 
   if (surprise > 0.55) plantAdSpore(ad); 
@@ -1437,3 +1478,5 @@ window.onload = function() {
   }
   Engagement.updateResonance();
 };
+
+try{ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', renderP16Loop); else setTimeout(renderP16Loop,50); }catch(e){}
