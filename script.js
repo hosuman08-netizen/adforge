@@ -121,6 +121,105 @@ function deliverAd(ad, spendNow) {
   return { impressions, clicks, spend: actualSpend, cpm: +effCpm.toFixed(2), ctr: est.ctr, capped, est };
 }
 
+// ============================================================
+// === VOICE ANALYSER — real creative-quality signal ==========
+// Measures the ACTUAL recorded voice (Web Audio) so "voice resonance"
+// is derived from what you performed, not a constant or random number.
+// Loud + expressive + varied delivery scores higher than silence / monotone.
+// Also drives the live waveform on the #voice-lung canvas. Bounded 0.10–1.00.
+// ============================================================
+const VoiceAnalyser = {
+  ctx: null, analyser: null, source: null, raf: 0,
+  samples: [],          // per-frame RMS energy (0..1)
+  peak: 0,              // loudest frame
+  canvas: null, cvx: null,
+
+  // Attach to a live mic stream and start measuring + drawing the waveform.
+  start(stream) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      this.ctx = new AC();
+      this.analyser = this.ctx.createAnalyser();
+      this.analyser.fftSize = 1024;
+      this.source = this.ctx.createMediaStreamSource(stream);
+      this.source.connect(this.analyser);
+      this.samples = []; this.peak = 0;
+      this.canvas = document.getElementById('voice-lung');
+      if (this.canvas) {
+        this.canvas.style.display = 'block';
+        this.cvx = this.canvas.getContext('2d');
+      }
+      const buf = new Uint8Array(this.analyser.fftSize);
+      const tick = () => {
+        this.analyser.getByteTimeDomainData(buf);
+        // RMS energy of this frame (centered at 128).
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) { const v = (buf[i] - 128) / 128; sum += v * v; }
+        const rms = Math.sqrt(sum / buf.length);
+        this.samples.push(rms);
+        if (rms > this.peak) this.peak = rms;
+        this._draw(buf, rms);
+        this.raf = requestAnimationFrame(tick);
+      };
+      tick();
+      return true;
+    } catch (e) { return false; }
+  },
+
+  // Draw a live waveform + energy glow so recording feels alive.
+  _draw(buf, rms) {
+    const c = this.canvas, x = this.cvx;
+    if (!c || !x) return;
+    const W = c.width, H = c.height;
+    x.fillStyle = '#1c1811'; x.fillRect(0, 0, W, H);
+    // energy glow proportional to loudness
+    const glow = Math.min(1, rms * 3.2);
+    x.strokeStyle = `rgba(197,164,110,${0.35 + glow * 0.55})`;
+    x.lineWidth = 1.6; x.beginPath();
+    const step = Math.max(1, Math.floor(buf.length / W));
+    for (let i = 0, px = 0; i < buf.length; i += step, px++) {
+      const y = (buf[i] / 255) * H;
+      i === 0 ? x.moveTo(px, y) : x.lineTo(px, y);
+    }
+    x.stroke();
+    // moving energy bar at bottom
+    x.fillStyle = `rgba(143,191,127,${0.4 + glow * 0.6})`;
+    x.fillRect(0, H - 4, Math.floor(W * glow), 4);
+  },
+
+  // Stop, tear down, and return a real 0.10–1.00 resonance score.
+  stop() {
+    cancelAnimationFrame(this.raf);
+    const s = this.samples;
+    let score = 0.42; // neutral fallback if nothing captured
+    if (s.length > 3) {
+      const mean = s.reduce((a, b) => a + b, 0) / s.length;
+      // Dynamic variation: expressive delivery rises & falls, monotone is flat.
+      const variance = s.reduce((a, b) => a + (b - mean) * (b - mean), 0) / s.length;
+      const dynamics = Math.sqrt(variance);
+      // Blend loudness (presence), peak (projection), dynamics (expression).
+      const loud = Math.min(1, mean * 6.0);        // typical speech mean ~0.08–0.18
+      const proj = Math.min(1, this.peak * 3.2);
+      const expr = Math.min(1, dynamics * 12.0);
+      score = 0.10 + (loud * 0.42 + proj * 0.28 + expr * 0.30) * 0.90;
+    }
+    score = Math.min(1, Math.max(0.1, score));
+    try { if (this.ctx) this.ctx.close(); } catch (e) {}
+    this.ctx = this.analyser = this.source = null;
+    if (this.canvas) {
+      // hold the final frame briefly, then hide the (now-idle) canvas
+      setTimeout(() => { if (this.canvas) this.canvas.style.display = 'none'; }, 1600);
+    }
+    this._last = +score.toFixed(3);
+    return this._last;
+  },
+  _last: 0.42
+};
+// Public accessor used across the app. Returns the last measured voice score,
+// so ad creation / delivery use the REAL resonance from your recording.
+window.getP6LungSurprise = function () { return VoiceAnalyser._last; };
+
 // === ENGAGEMENT ENGINE (fictional simulation) ===
 // Simulated engagement dashboard: performance highlights, variable bid/earning
 // multipliers, recent-auction outcomes, opportunity prompts, owned-slot status.
@@ -410,15 +509,15 @@ function recordVoiceAd() {
   navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
     const rec = new MediaRecorder(stream);
     let chunks = [];
+    VoiceAnalyser.start(stream); // measure the real voice + live waveform
     rec.ondataavailable = e => chunks.push(e.data);
     rec.onstop = () => {
       const blob = new Blob(chunks, {type:'audio/webm'});
       const url = URL.createObjectURL(blob);
-      
-      let surprise = 0.3;
-      if (window.getP6LungSurprise) surprise = window.getP6LungSurprise();
-      const artistic = p6VoiceExpertInsight ? {insight: p6VoiceExpertInsight(surprise), rating: surprise} : {insight:'breath resonance', rating:surprise};
-      
+
+      const surprise = VoiceAnalyser.stop(); // REAL resonance from your recording
+      const artistic = {insight: p6VoiceExpertInsight(surprise), rating: surprise};
+
       preview.innerHTML = `<audio controls src="${url}"></audio><br>👁 Resonance: ${surprise.toFixed(2)} • ${artistic.insight} • Boost +${Math.floor(surprise*28)}%`;
       window._p16Voice = { url, surprise, artistic };
       Engagement.updateResonance(); // voice now feeds the resonance multiplier
@@ -475,7 +574,7 @@ function createAd() {
   addToCodex(`Created ad: ${title}. Audience ${ad.audience.reach.toLocaleString()} in [${ad.audience.segments.join(', ')}] • relevance ${ad.audience.relevance} • CPM ${ad.audience.cpm}. Voice resonance ${surprise}.${isAdult ? ' [Adult 18+]' : ''}`);
 
   // prominent fictional disclosure
-  const shield = "FICTIONAL ONLY. Simulated performance. Utility credits only — no real value or securities. Adult content (p8/p9) gated 18+.";
+  const shield = "FICTIONAL ONLY. Simulated performance. Utility credits only — no real value or securities. Adult content gated 18+.";
   alert(`Ad created (FICTIONAL). ${shield}\n\nTARGETING → AUDIENCE\nSegments: ${ad.audience.segments.join(', ')}\nEstimated reach: ${ad.audience.reach.toLocaleString()} users\nRelevance: ${(ad.audience.relevance*100).toFixed(0)}% • est. CPM ${ad.audience.cpm} • est. CTR ${(ad.audience.ctr*100).toFixed(2)}%\nBudget ${budget} → ~${Math.floor((budget/Math.max(1,ad.audience.cpm))*1000).toLocaleString()} projected imps.\n\nOpen Inventory → "Deliver" to run the campaign.`);
   document.getElementById('ad-title').value = '';
   document.getElementById('ad-desc').value = '';
@@ -980,10 +1079,11 @@ function recordVoiceOver() {
   el.innerHTML = 'voice Studio: Capturing your voice-over...';
   navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
     const rec = new MediaRecorder(stream); let chunks=[];
+    VoiceAnalyser.start(stream); // measure the real voice-over
     rec.ondataavailable = e=>chunks.push(e.data);
     rec.onstop = () => {
       const url=URL.createObjectURL(new Blob(chunks,{type:'audio/webm'}));
-      const surprise = (window.getP6LungSurprise && window.getP6LungSurprise()) || 0.59;
+      const surprise = VoiceAnalyser.stop();
       const insight = p6VoiceExpertInsight(surprise);
       el.innerHTML = `<audio controls src="${url}"></audio><br>🎙️ VoiceOver • ${surprise.toFixed(2)}<br>${insight}`;
       window._p16VoiceOver = {url, surprise, insight, ts:Date.now()};
@@ -1001,9 +1101,10 @@ function analyzeAdPerformanceWithVoice(adId) {
   if (el) el.innerHTML = 'Voice Analyst: Speak performance observation...';
   navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
     const rec=new MediaRecorder(stream); let chunks=[];
+    VoiceAnalyser.start(stream);
     rec.ondataavailable=e=>chunks.push(e.data);
     rec.onstop=()=>{
-      const s=(window.getP6LungSurprise&&window.getP6LungSurprise())||(0.42+Math.random()*0.48);
+      const s=VoiceAnalyser.stop();
       const rep = buildPerformanceReport(ad); // REAL data-driven report
       if(el) el.innerHTML = `<div style="font-size:11px">${rep.html}<br><span style="color:#c5a46e">👁 voice resonance ${s.toFixed(2)} layered on the data above.</span></div>`;
       addToCodex(`Perf report • ${ad.title}: ${rep.verdict} — CTR ${(rep.ctr*100).toFixed(2)}% vs bench ${(rep.benchmark*100).toFixed(2)}%, CPC ${rep.cpc}, ${rep.reachPct}% reach used.`);
@@ -1116,7 +1217,7 @@ function showVoiceForge(){
 function showVoiceAnalyst(){
   hideAll();
   const sec = document.getElementById('voiceanalyst') || createVoiceSection('voiceanalyst','Voice Analyst • Performance via Voice');
-  let html = `<h2>Voice Analyst (p6)</h2><div id="analyst-preview"></div>`;
+  let html = `<h2>Voice Analyst</h2><div id="analyst-preview"></div>`;
   const recent = ads.slice(0,4);
   recent.forEach(a=>{ html += `<div class="ad-card"><strong>${a.title}</strong> <button onclick="analyzeAdPerformanceWithVoice(${a.id});startVoicePerformanceMeter(${a.id})">Speak Analysis + Meter</button></div>`; });
   html += `<small>Record voice → resonance rates performance. ALWAYS LEARNING mutates ad.</small>`;
