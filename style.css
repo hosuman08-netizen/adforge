@@ -34,7 +34,8 @@ button:hover { border-color: var(--gold); }
 .form textarea { height: 80px; }
 
 .grid { display: grid; gap: 10px; }
-.ad-card { background: var(--card); border: 1px solid #3a3124; padding: 14px; border-radius: 8px; }
+.ad-card { background: var(--card); border: 1px solid #3a3124; padding: 14px; border-radius: 8px; margin-bottom: 12px; }
+.ad-card .muted { color: var(--dim); font-size: 12px; }
 .ad-card .surprise { color: #f5d76e; font-size: 11px; }
 .ad-card button { margin-top: 8px; width: 100%; }
 

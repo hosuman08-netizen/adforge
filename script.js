@@ -819,10 +819,10 @@ function showCodex() {
   hideAll();
   document.getElementById('codex').classList.remove('hidden');
   const list = document.getElementById('codex-list');
-  list.innerHTML = '<h3>Activity Log</h3>';
-  
+  list.innerHTML = '';
+
   if (codex.length === 0) {
-    list.innerHTML += '<p>Create or bid to see activity here.</p>';
+    list.innerHTML = '<p>Create or bid to see activity here.</p>';
     return;
   }
   
@@ -1419,8 +1419,8 @@ const _oldJoin = window.joinLiveAuction;
 window.joinLiveAuction = joinLiveAuctionLilith;
 
 // on-chain stubs (web3 simulation)
-if (typeof showNFTSlots !== 'function') { window.showNFTSlots = () => { hideAll(); document.getElementById('inventory').classList.remove('hidden'); const l = document.getElementById('inventory-list'); l.innerHTML = '<h3>AdSlot NFTs</h3>'; (nftSlots||[]).forEach(s => { const d = document.createElement('div'); d.className='ad-card'; d.innerHTML = `#${s.id} ${s.type} min${s.minPrice}<button onclick="startDutchAuction(${s.id})">Dutch</button>`; l.appendChild(d); }); }; }
-if (typeof showAuctions !== 'function') { window.showAuctions = () => { hideAll(); document.getElementById('inventory').classList.remove('hidden'); const l = document.getElementById('inventory-list'); l.innerHTML = '<h3>On-Chain Auctions</h3>'; (auctions||[]).forEach(a => { const d = document.createElement('div'); d.className='ad-card'; d.innerHTML = `Auc${a.id} @${a.currentPrice} ${a.settled?'done':''}<button onclick="placeBid(${a.id})">Bid</button>`; l.appendChild(d); }); }; }
+if (typeof showNFTSlots !== 'function') { window.showNFTSlots = () => { hideAll(); document.getElementById('inventory').classList.remove('hidden'); const l = document.getElementById('inventory-list'); l.innerHTML = '<h3>AdSlot NFTs</h3>'; const slots = nftSlots||[]; if (!slots.length) { l.innerHTML += '<p>No AdSlot NFTs yet. Mint one to auction it.</p>'; return; } slots.forEach(s => { const label = String(s.type||'slot').replace(/-/g,' '); const d = document.createElement('div'); d.className='ad-card'; d.innerHTML = `<strong>#${s.id} · ${label}</strong><br><span class="muted">Min price ${s.minPrice} Credits</span><button onclick="startDutchAuction(${s.id})" class="primary">Start Auction</button>`; l.appendChild(d); }); }; }
+if (typeof showAuctions !== 'function') { window.showAuctions = () => { hideAll(); document.getElementById('inventory').classList.remove('hidden'); const l = document.getElementById('inventory-list'); l.innerHTML = '<h3>On-Chain Auctions</h3>'; const aucs = auctions||[]; if (!aucs.length) { l.innerHTML += '<p>No live auctions. Start one from an AdSlot NFT.</p>'; return; } aucs.forEach(a => { const d = document.createElement('div'); d.className='ad-card'; const status = a.settled ? '<span class="muted"> · settled</span>' : ''; d.innerHTML = `<strong>Auction #${a.id}</strong>${status}<br><span class="muted">Current price ${a.currentPrice} Credits</span>` + (a.settled ? '' : `<button onclick="placeBid(${a.id})" class="primary">Place Bid</button>`); l.appendChild(d); }); }; }
 if (typeof crossP11Metaverse !== 'function') { window.crossP11Metaverse = () => { const s = {id:Date.now(),owner:wallet||'0xDemo',type:'metaverse-billboard',minPrice:155}; (window.nftSlots = nftSlots||[]).unshift(s); localStorage.setItem('p16_nftSlots',JSON.stringify(nftSlots)); alert('Metaverse NFT slot added.'); showNFTSlots(); }; }
 
 window.onload = function() {
