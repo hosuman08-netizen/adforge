@@ -575,6 +575,7 @@ function createAd() {
 
   ads.unshift(ad);
   localStorage.setItem('p16_ads', JSON.stringify(ads));
+  if (window.legionTrack) window.legionTrack('activate');
 
   if (surprise > 0.55) plantAdSpore(ad); 
   Engagement.updateResonance();
@@ -936,6 +937,7 @@ Fictional simulation. 18+ only. Rates & limits shown in-app.
 
 #Web3Ads`;
 
+  if (window.legionTrack) window.legionTrack('share');
   navigator.clipboard.writeText(copy).then(() => {
     alert('🐦 Share copy copied. Post it to spread your campaign.');
     addToCodex('Share copy generated for your campaign.');
