@@ -1483,3 +1483,6 @@ window.onload = function() {
 };
 
 try{ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', renderP16Loop); else setTimeout(renderP16Loop,50); }catch(e){}
+
+/* LEGION_WAVE_53_fomo_chip */
+setTimeout(function(){try{if(document.getElementById('lw_fomo_53'))return;var end=new Date(); end.setHours(24,0,0,0);var ms=Math.max(0,end-Date.now());var h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000);var d=document.createElement('div'); d.id='lw_fomo_53';d.style.cssText='font-size:11px;opacity:.75;margin:6px 0;color:#e0b552';d.textContent='window '+h+'h '+m+'m · W53';var app=document.getElementById('app')||document.body; app.insertBefore(d, app.firstChild);}catch(e){}},40);
