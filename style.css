@@ -128,3 +128,38 @@ button { transition: all 160ms ease; } /* SENSE motion: 200ms-ish ease-out, feel
 .aud-preview-row b { color: var(--text); }
 .aud-preview-proj { color: #d4b98a; margin-top: 3px; }
 .aud-preview-tip { color: #e0a05e; margin-top: 4px; font-size: 10px; }
+
+/* === AD-CREATION RESULT CARD (replaces native alert — core payoff moment) === */
+.ad-result {
+  position: relative;
+  background: #14110c;
+  border: 1px solid #3a3124;
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 14px 14px 12px;
+  margin: 0 0 16px;
+  animation: adResultIn 220ms ease-out;
+}
+@keyframes adResultIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.ad-result-x {
+  position: absolute; top: 8px; right: 8px;
+  background: transparent; border: none; color: var(--dim);
+  font-size: 16px; line-height: 1; padding: 2px 6px; cursor: pointer;
+}
+.ad-result-x:hover { color: var(--text); }
+.ad-result-head { font-size: 12px; color: #8fbf7f; letter-spacing: 0.3px; }
+.ad-result-fic { font-size: 8.5px; color: var(--dim); border: 1px solid #3a3124; border-radius: 3px; padding: 1px 5px; margin-left: 6px; vertical-align: middle; }
+.ad-result-title { font-size: 15px; color: var(--text); font-weight: 600; margin: 4px 0 8px; }
+.ad-result-flow { font-size: 12px; color: var(--dim); margin-bottom: 10px; }
+.ad-result-flow b { color: var(--gold); }
+.ad-result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+.ad-result-grid > div { display: flex; flex-direction: column; }
+.ad-result-grid span { font-size: 9.5px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.4px; }
+.ad-result-grid b { font-size: 15px; color: var(--text); font-weight: 600; }
+.ad-result-proj { font-size: 12px; color: #d4b98a; margin-bottom: 6px; }
+.ad-result-proj b { color: var(--gold); }
+.ad-result-res { font-size: 11px; color: var(--dim); margin-bottom: 12px; }
+.ad-result-res b { color: #d4b98a; }
+.ad-result-cta { width: 100%; }
+.ad-result-note { font-size: 9px; color: var(--dim); opacity: 0.75; margin-top: 8px; line-height: 1.5; }
+@media (max-width: 420px) { .ad-result-grid { grid-template-columns: repeat(2, 1fr); } }

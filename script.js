@@ -56,8 +56,15 @@ function _hashStr(s) {
 function parseTargeting(targetText) {
   const t = (targetText || '').toLowerCase();
   const matched = [];
+  // Word-boundary match so an alias only matches whole words/phrases — e.g.
+  // "young adults" must NOT match the "adult" (18+) segment. Escapes regex
+  // metacharacters and treats '+'/'-' inside aliases (18+, on-chain) literally.
+  const hasAlias = (alias) => {
+    const esc = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp('(?:^|[^a-z0-9])' + esc + '(?![a-z0-9])', 'i').test(t);
+  };
   AUDIENCE_SEGMENTS.forEach(seg => {
-    if (seg.aliases.some(a => t.includes(a))) matched.push(seg);
+    if (seg.aliases.some(hasAlias)) matched.push(seg);
   });
   if (matched.length === 0) matched.push(GENERAL_SEGMENT);
   return matched;
@@ -573,12 +580,46 @@ function createAd() {
   Engagement.updateResonance();
   addToCodex(`Created ad: ${title}. Audience ${ad.audience.reach.toLocaleString()} in [${ad.audience.segments.join(', ')}] • relevance ${ad.audience.relevance} • CPM ${ad.audience.cpm}. Voice resonance ${surprise}.${isAdult ? ' [Adult 18+]' : ''}`);
 
-  // prominent fictional disclosure
-  const shield = "FICTIONAL ONLY. Simulated performance. Utility credits only — no real value or securities. Adult content gated 18+.";
-  alert(`Ad created (FICTIONAL). ${shield}\n\nTARGETING → AUDIENCE\nSegments: ${ad.audience.segments.join(', ')}\nEstimated reach: ${ad.audience.reach.toLocaleString()} users\nRelevance: ${(ad.audience.relevance*100).toFixed(0)}% • est. CPM ${ad.audience.cpm} • est. CTR ${(ad.audience.ctr*100).toFixed(2)}%\nBudget ${budget} → ~${Math.floor((budget/Math.max(1,ad.audience.cpm))*1000).toLocaleString()} projected imps.\n\nOpen Inventory → "Deliver" to run the campaign.`);
+  // Elegant in-page payoff card (replaces the blocking native alert) — the
+  // "targeting → real audience" moment is the core reward, so make it beautiful.
+  showAdResult(ad, budget, surprise);
   document.getElementById('ad-title').value = '';
   document.getElementById('ad-desc').value = '';
-  showInventory();
+}
+
+// Render the ad-creation result as a dismissable, on-theme card instead of an
+// OS alert(). Shows how the chosen targeting mapped to a concrete audience.
+function showAdResult(ad, budget, surprise) {
+  const a = ad.audience;
+  const projImps = Math.floor((budget / Math.max(1, a.cpm)) * 1000);
+  const relPct = Math.round(a.relevance * 100);
+  const relColor = a.relevance >= 0.7 ? '#8fbf7f' : a.relevance >= 0.45 ? '#d4b98a' : '#e0a05e';
+  const resPct = Math.round(surprise * 100);
+  const old = document.getElementById('ad-result'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'ad-result';
+  el.className = 'ad-result';
+  el.innerHTML = `
+    <button class="ad-result-x" onclick="this.parentNode.remove()" aria-label="Dismiss">×</button>
+    <div class="ad-result-head">✅ Ad created <span class="ad-result-fic">FICTIONAL</span></div>
+    <div class="ad-result-title">${ad.title}</div>
+    <div class="ad-result-flow">🎯 Targeting → <b>${a.segments.join(' + ')}</b></div>
+    <div class="ad-result-grid">
+      <div><span>Reach</span><b>${a.reach.toLocaleString()}</b></div>
+      <div><span>Relevance</span><b style="color:${relColor}">${relPct}%</b></div>
+      <div><span>est. CPM</span><b>${a.cpm}</b></div>
+      <div><span>est. CTR</span><b>${(a.ctr*100).toFixed(2)}%</b></div>
+    </div>
+    <div class="ad-result-proj">Budget ${budget} → ~<b>${projImps.toLocaleString()}</b> projected impressions</div>
+    <div class="ad-result-res">🎙 Voice resonance <b>${surprise.toFixed(2)}</b> · ${resPct >= 55 ? 'lifting relevance' : 'record a stronger voice to lift relevance'}</div>
+    <button class="primary ad-result-cta" onclick="showInventory()">Go to Inventory → Deliver</button>
+    <div class="ad-result-note">Simulated performance · Utility credits only, no real value or securities · Adult content gated 18+.</div>
+  `;
+  const section = document.getElementById('create');
+  const h2 = section.querySelector('h2');
+  if (h2 && h2.nextSibling) section.insertBefore(el, h2.nextSibling);
+  else section.appendChild(el);
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // Live audience preview as the advertiser types targeting — instant proof that
