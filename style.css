@@ -347,3 +347,37 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; h
 /* toast */
 .am-toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px); background:#1a1510; border:1px solid var(--gold); color:var(--text); font-size:11px; padding:10px 16px; border-radius:8px; max-width:90vw; opacity:0; pointer-events:none; transition:opacity 200ms ease, transform 200ms ease; z-index:60; box-shadow:0 6px 24px rgba(0,0,0,0.5); }
 .am-toast.show { opacity:1; transform:translate(-50%,0); }
+
+/* ============================================================================
+   TREND CHART · BREAKDOWN · LEARNING PHASE (dashboard depth) — SENSE:
+   one gold protagonist line, restraint, 8px grid, ease-out. Reuses tokens.
+   ============================================================================ */
+/* performance trend (hero of the dashboard) */
+.trend { background:var(--card); border:1px solid #3a3124; border-radius:10px; padding:14px 14px 10px; margin-bottom:16px; }
+.trend-head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.trend-scope { font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:0.5px; }
+.trend-seg { flex:0 0 auto; }
+.trend-seg button { padding:4px 8px; font-size:9.5px; }
+.trend-hero { display:flex; align-items:baseline; gap:10px; margin:10px 0 2px; }
+.trend-metric-l { font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:0.5px; }
+.trend-val { font-size:28px; color:var(--gold); font-weight:700; letter-spacing:-0.5px; line-height:1; }
+.trend-delta { font-size:11px; font-weight:600; }
+.trend-svg { margin:4px -2px 0; }
+.trend-svg svg { display:block; }
+.trend-axis { display:flex; align-items:center; justify-content:space-between; font-size:9px; color:var(--dim); margin-top:2px; }
+.trend-freq { color:#d4b98a; letter-spacing:0.3px; }
+.trend-empty { font-size:11px; color:var(--dim); text-align:center; padding:22px 8px; }
+
+/* breakdown selector + bars */
+.bd-t { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.bd-seg { margin-left:auto; }
+.bd-seg button { padding:4px 9px; font-size:9.5px; }
+.mtbl.bd-tbl td.ent { max-width:none; }
+.bd-ent { position:relative; }
+.bd-bar { position:absolute; left:0; top:50%; transform:translateY(-50%); height:20px; background:rgba(197,164,110,0.10); border-radius:3px; z-index:0; transition:width 300ms ease; }
+.bd-lbl { position:relative; z-index:1; }
+
+/* learning phase pill */
+.lp-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 6px; }
+.lphase { font-size:9px; font-weight:600; border:1px solid; border-radius:10px; padding:1px 8px; letter-spacing:0.2px; white-space:nowrap; }
+.lp-note { font-size:9px; color:var(--dim); line-height:1.4; }

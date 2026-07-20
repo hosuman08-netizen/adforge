@@ -304,6 +304,8 @@
         '<div class="camp-title"><span class="tw">' + (c._open ? '▾' : '▸') + '</span> ' + obj.icon + ' <b>' + h(c.name) + '</b><span class="obj-tag">' + obj.label + '</span></div>' +
         '<div class="opp" title="Opportunity Score"><span style="color:' + strengthColor(opp.tier) + '">' + opp.score + '</span><small>opp</small></div></div>';
       html += '<div class="camp-meta">' + h(BIDS[c.bidStrategy] ? BIDS[c.bidStrategy].label : 'Max Conversions') + ' · ' + (c.budgetMode || 'CBO') + ' · ' + fmt(c.budget) + ' Cr ' + (c.budgetType || 'daily') + '</div>';
+      var lp = learningPhase(c);
+      html += '<div class="lp-row"><span class="lphase" style="color:' + lp.color + ';border-color:' + lp.color + '55">● ' + lp.phase + (lp.phase !== 'Active' ? ' · ' + lp.pct + '%' : '') + '</span><span class="lp-note">' + h(lp.note) + '</span></div>';
       html += '<div class="budget-bar" title="Spent ' + fmt(t.spend) + ' / ' + fmt(c.budget) + '"><div style="width:' + bpct + '%"></div></div>';
       html += '<div class="camp-metrics">' +
         chip('Impr', fmt(m.impressions)) + chip('Clicks', fmt(m.clicks)) + chip('CTR', pct(m.ctr)) +
@@ -611,6 +613,8 @@
     // controls: column preset + attribution
     html += '<div class="dash-ctrl"><div class="seg small">' + Object.keys(COLSETS).map(function (k) { return '<button class="' + (UI.cols === k ? 'on' : '') + '" onclick="amCols(\'' + k + '\')">' + COLSETS[k].label + '</button>'; }).join('') + '</div>';
     html += '<div class="attr"><label>Attribution</label><select onchange="amAttr(this.value)">' + Object.keys(ATTRIBUTION).map(function (k) { return '<option value="' + k + '"' + (UI.attribution === k ? ' selected' : '') + '>' + ATTRIBUTION[k].label + '</option>'; }).join('') + '</select></div></div>';
+    // performance trend (time-series) — the hero of every best-in-class dashboard
+    html += renderTrend();
     // build rows
     var rows = [];
     var list = dashFocus ? CAMPAIGNS.filter(function (c) { return c.id === dashFocus; }) : CAMPAIGNS;
@@ -629,22 +633,65 @@
       html += '<tr class="lvl-' + r.level + '"><td class="ent">' + h(r.name) + '</td>' + cols.map(function (ck) { return '<td>' + COLDEF[ck].f(r.m, r) + '</td>'; }).join('') + '</tr>';
     });
     html += '</tbody></table></div>';
-    // attribution breakdown + placement breakdown for focused campaign
+    // universal breakdown (Meta-style: split delivery by a dimension) — column totals preserved
+    html += renderBreakdown();
+    // attribution breakdown for focused campaign — same conversions, different models
     if (dashFocus) {
       var c = byId(dashFocus); var t = campTotals(c); var m = metrics(t);
       html += '<div class="wz"><div class="wz-t">Attribution breakdown <span class="muted">— same conversions, different models</span></div><div class="proj-grid">' +
         chip('First-click', fmt(m.conversions * 0.9)) + chip('Last-click', fmt(m.conversions)) + chip('Data-driven', fmt(m.conversions * 1.05)) + '</div></div>';
-      // placement breakdown
-      var pb = {}; (c.adsets || []).forEach(function (as) { (as.ads || []).forEach(function (ad) { for (var k in (ad.placements || {})) { pb[k] = pb[k] || { imp: 0, clk: 0 }; pb[k].imp += ad.placements[k].imp; pb[k].clk += ad.placements[k].clk; } }); });
-      if (Object.keys(pb).length) {
-        html += '<div class="wz"><div class="wz-t">Placement breakdown</div><div class="tbl-wrap"><table class="mtbl"><thead><tr><th>Placement</th><th>Impr</th><th>Clicks</th><th>CTR</th></tr></thead><tbody>';
-        PLACEMENTS.forEach(function (p) { if (pb[p.key]) { var x = pb[p.key]; html += '<tr><td class="ent">' + p.label + '</td><td>' + fmt(x.imp) + '</td><td>' + fmt(x.clk) + '</td><td>' + pct(x.imp ? x.clk / x.imp : 0) + '</td></tr>'; } });
-        html += '</tbody></table></div></div>';
-      }
     }
     html += '<div class="am-note">Fictional simulation · figures are illustrative · Auction Insights are simulated competitive estimates · displayed values derive from delivered numbers.</div>';
     host.innerHTML = html;
   };
+  function renderTrend() {
+    var mkey = TREND_METRICS[UI.trendMetric] ? UI.trendMetric : 'spend';
+    var series = trendSeries(dashFocus || null);
+    var scopeName = dashFocus ? ((byId(dashFocus) || {}).name || 'Campaign') : 'All campaigns';
+    var head = '<div class="trend-head"><div class="trend-scope">' + h(scopeName) + '</div>' +
+      '<div class="seg small trend-seg">' + Object.keys(TREND_METRICS).map(function (k) { return '<button class="' + (mkey === k ? 'on' : '') + '" onclick="amTrend(\'' + k + '\')">' + TREND_METRICS[k].l + '</button>'; }).join('') + '</div></div>';
+    if (!series.length) {
+      return '<div class="trend">' + head + '<div class="trend-empty">No delivery yet — hit ▶ Run delivery on a campaign to build the trend.</div></div>';
+    }
+    var M = TREND_METRICS[mkey], vals = series.map(function (d) { return +M.f(d) || 0; });
+    var last = vals[vals.length - 1], first = vals[0];
+    var deltaHtml = '';
+    if (series.length > 1 && first !== 0) {
+      var dp = (last - first) / Math.abs(first) * 100;
+      var up = dp >= 0;
+      deltaHtml = '<span class="trend-delta" style="color:' + (up ? '#8fbf7f' : '#e06b6b') + '">' + (up ? '▲' : '▼') + ' ' + Math.abs(dp).toFixed(0) + '%</span>';
+    }
+    // reach & frequency context (honest: avg impressions per UNIQUE reached user,
+    // always ≥1 — bounded by the delivery engine's ~3× frequency cap).
+    var totImp = series.reduce(function (a, d) { return a + d.imp; }, 0);
+    var pool = scopeReach(scopeList());
+    var uniq = Math.max(1, Math.min(pool || totImp, totImp));
+    var freq = uniq ? totImp / uniq : 0;
+    var hero = '<div class="trend-hero"><div class="trend-metric-l">' + M.l + '</div><div class="trend-val">' + M.fmt(last) + '</div>' + deltaHtml + '</div>';
+    var body = '<div class="trend-svg">' + svgTrend(series, mkey) + '</div>';
+    var axis = '<div class="trend-axis"><span>' + fmtDate(series[0].ts) + '</span>' +
+      (freq ? '<span class="trend-freq">Avg frequency ' + freq.toFixed(1) + '×</span>' : '') +
+      '<span>' + fmtDate(series[series.length - 1].ts) + '</span></div>';
+    return '<div class="trend">' + head + hero + body + axis + '</div>';
+  }
+  function renderBreakdown() {
+    var list = scopeList(); if (!list.length) return '';
+    var dim = ['placement', 'age', 'region', 'device'].indexOf(UI.breakdown) >= 0 ? UI.breakdown : 'placement';
+    var DIMS = { placement: 'Placement', age: 'Age', region: 'Region', device: 'Device' };
+    var rows = breakdownRows(list, dim);
+    var seg = '<div class="seg small bd-seg">' + Object.keys(DIMS).map(function (k) { return '<button class="' + (dim === k ? 'on' : '') + '" onclick="amBreakdown(\'' + k + '\')">' + DIMS[k] + '</button>'; }).join('') + '</div>';
+    var html = '<div class="wz"><div class="wz-t bd-t">Breakdown <span class="muted">— split delivery by dimension</span>' + seg + '</div>';
+    if (!rows.length) { html += '<div class="am-empty" style="padding:16px">No delivery data for this breakdown yet.</div></div>'; return html; }
+    var maxImp = rows.reduce(function (a, r) { return Math.max(a, r.imp); }, 1);
+    html += '<div class="tbl-wrap"><table class="mtbl bd-tbl"><thead><tr><th>' + DIMS[dim] + '</th><th>Impr</th><th>Clicks</th><th>CTR</th><th>Conv</th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      var bw = Math.round(r.imp / maxImp * 100);
+      html += '<tr><td class="ent bd-ent"><span class="bd-bar" style="width:' + bw + '%"></span><span class="bd-lbl">' + h(r.label) + '</span></td>' +
+        '<td>' + fmt(r.imp) + '</td><td>' + fmt(r.clk) + '</td><td>' + pct(r.ctr) + '</td><td>' + (r.conv == null ? '—' : fmt(r.conv)) + '</td></tr>';
+    });
+    html += '</tbody></table></div><div class="am-note" style="margin-top:8px">Segment volumes are modeled from your audience controls (age floor, region) and delivered totals — column sums equal the campaign total. Fictional simulation.</div></div>';
+    return html;
+  }
   function rowFor(level, name, t, entity) {
     var m = metrics(t);
     var r = { level: level, name: name, m: m };
@@ -745,6 +792,149 @@
   };
   window.amDelExp = function (id) { if (!confirm('Delete experiment?')) return; EXPERIMENTS = EXPERIMENTS.filter(function (e) { return e.id !== id; }); saveE(); window.showExperiments(); };
 
+  // ======================= TREND · BREAKDOWN · LEARNING PHASE ===============
+  // Best-in-class dashboard depth: a real time-series trend (from the delivery
+  // history every run already records), Meta-style breakdowns (age / region /
+  // device / placement), and a Meta-style learning-phase status. All numbers
+  // are DETERMINISTIC and derived from delivered totals — breakdown column
+  // sums equal the campaign totals (no invented volume). Fictional simulation.
+
+  function attMult() { return (ATTRIBUTION[UI.attribution] || ATTRIBUTION['7d1d']).mult; }
+  function scopeList() { return dashFocus ? [byId(dashFocus)].filter(Boolean) : CAMPAIGNS.slice(); }
+  function fmtDate(ts) { var d = new Date(ts); return (d.getMonth() + 1) + '/' + d.getDate(); }
+
+  // ---- time-series: bucket the recorded per-run history into delivery events
+  function collectHistory(scope) {
+    var list = scope ? CAMPAIGNS.filter(function (c) { return c.id === scope; }) : CAMPAIGNS;
+    var ev = [];
+    list.forEach(function (c) { (c.adsets || []).forEach(function (as) { (as.ads || []).forEach(function (ad) { (ad.history || []).forEach(function (hh) { ev.push(hh); }); }); }); });
+    return ev;
+  }
+  function trendSeries(scope) {
+    var ev = collectHistory(scope); if (!ev.length) return [];
+    ev = ev.slice().sort(function (a, b) { return a.ts - b.ts; });
+    var am = attMult(), buckets = [], cur = null;
+    ev.forEach(function (e) {
+      if (cur && (e.ts - cur.ts) < 4000) { cur.imp += e.imp; cur.clk += e.clk; cur.spend += e.spend; cur.conv += e.conv; cur.val += e.val; cur.ts = e.ts; }
+      else { cur = { ts0: e.ts, ts: e.ts, imp: e.imp || 0, clk: e.clk || 0, spend: e.spend || 0, conv: e.conv || 0, val: e.val || 0 }; buckets.push(cur); }
+    });
+    return buckets.map(function (b) {
+      var conv = b.conv * am, val = b.val * am;
+      return { ts: b.ts0, imp: b.imp, clk: b.clk, spend: +b.spend.toFixed(2), conv: +conv.toFixed(2), val: val,
+        ctr: b.imp ? b.clk / b.imp : 0, roas: b.spend ? val / b.spend : 0, cpa: conv ? b.spend / conv : 0, cpc: b.clk ? b.spend / b.clk : 0 };
+    });
+  }
+  var TREND_METRICS = {
+    spend:       { l: 'Spend',  f: function (d) { return d.spend; }, fmt: function (v) { return fmt(v); } },
+    impressions: { l: 'Impr',   f: function (d) { return d.imp; },   fmt: function (v) { return fmt(v); } },
+    clicks:      { l: 'Clicks', f: function (d) { return d.clk; },   fmt: function (v) { return fmt(v); } },
+    conversions: { l: 'Conv',   f: function (d) { return d.conv; },  fmt: function (v) { return fmt(v); } },
+    ctr:         { l: 'CTR',    f: function (d) { return d.ctr; },   fmt: function (v) { return pct(v); } },
+    roas:        { l: 'ROAS',   f: function (d) { return d.roas; },  fmt: function (v) { return v.toFixed(2) + 'x'; } }
+  };
+  function svgTrend(series, mkey) {
+    var M = TREND_METRICS[mkey] || TREND_METRICS.spend;
+    var vals = series.map(function (d) { return +M.f(d) || 0; });
+    var n = vals.length;
+    var maxV = Math.max.apply(null, vals), minV = Math.min.apply(null, vals);
+    var floaty = (mkey === 'ctr' || mkey === 'roas');
+    var base = floaty ? (minV > 0 ? minV * 0.82 : 0) : 0;
+    if (maxV <= base) maxV = base + 1;
+    var W = 320, H = 118, L = 10, Rr = 310, T = 16, Bb = 96;
+    var span = Math.max(1e-9, maxV - base);
+    var X = function (i) { return n <= 1 ? (L + Rr) / 2 : L + (Rr - L) * i / (n - 1); };
+    var Y = function (v) { return Bb - (Bb - T) * ((v - base) / span); };
+    var g = 'tg'; // gradient id (single chart per view)
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" width="100%" height="118" role="img" aria-label="' + M.l + ' trend">';
+    s += '<defs><linearGradient id="' + g + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c5a46e" stop-opacity="0.30"/><stop offset="1" stop-color="#c5a46e" stop-opacity="0"/></linearGradient></defs>';
+    s += '<line x1="' + L + '" y1="' + Bb + '" x2="' + Rr + '" y2="' + Bb + '" stroke="#3a3124" stroke-width="1"/>';
+    if (n <= 1) {
+      var cx = X(0), cy = Y(vals[0] || base);
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="#c5a46e"/>';
+    } else {
+      var pts = vals.map(function (v, i) { return X(i).toFixed(1) + ',' + Y(v).toFixed(1); });
+      s += '<path d="M' + X(0).toFixed(1) + ',' + Bb + ' L' + pts.join(' L') + ' L' + X(n - 1).toFixed(1) + ',' + Bb + ' Z" fill="url(#' + g + ')"/>';
+      s += '<path d="M' + pts.join(' L') + '" fill="none" stroke="#c5a46e" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+      var lx = X(n - 1), ly = Y(vals[n - 1]);
+      s += '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="3.2" fill="#c5a46e" stroke="#0a0806" stroke-width="1.5"/>';
+    }
+    s += '</svg>';
+    return s;
+  }
+
+  // ---- Meta-style breakdowns (deterministic; column totals preserved) ------
+  var AGE_BRACKETS = [
+    { key: '18–24', lo: 18, hi: 24, w: 0.20, ctr: 1.15 },
+    { key: '25–34', lo: 25, hi: 34, w: 0.32, ctr: 1.05 },
+    { key: '35–44', lo: 35, hi: 44, w: 0.24, ctr: 0.98 },
+    { key: '45–54', lo: 45, hi: 54, w: 0.14, ctr: 0.90 },
+    { key: '55+',   lo: 55, hi: 120, w: 0.10, ctr: 0.82 }
+  ];
+  var DEVICES = [
+    { label: 'Mobile',  w: 0.72, ctr: 1.06 },
+    { label: 'Desktop', w: 0.21, ctr: 0.90 },
+    { label: 'Tablet',  w: 0.07, ctr: 0.94 }
+  ];
+  var REGION_W = { us: 0.24, eu: 0.22, in: 0.20, jp: 0.09, kr: 0.06 }; // remainder → Other
+  var REGION_LABEL = { us: 'United States', eu: 'Europe', in: 'India', jp: 'Japan', kr: 'Korea', other: 'Other', global: 'Global' };
+
+  function adjTotals(list) {
+    var t = { imp: 0, clk: 0, spend: 0, conv: 0, val: 0 };
+    list.forEach(function (c) { if (!c) return; var x = campTotals(c); t.imp += x.imp; t.clk += x.clk; t.spend += x.spend; t.conv += x.conv; t.val += x.val; });
+    var am = attMult(); t.conv *= am; t.val *= am; return t;
+  }
+  function scopeReach(list) { var r = 0; list.forEach(function (c) { if (!c) return; (c.adsets || []).forEach(function (as) { r += audienceEstimate(asAudience(as)).reach; }); }); return r; }
+  function minAgeFloor(list) { var f = 99; list.forEach(function (c) { if (!c) return; (c.adsets || []).forEach(function (as) { var aud = asAudience(as); var a = (aud && aud.controls && aud.controls.ageMin) || 18; if (a < f) f = a; }); }); return f === 99 ? 18 : f; }
+  function bracketFrac(b, floor) { if (floor <= b.lo) return 1; if (floor > b.hi) return 0; return (b.hi - floor + 1) / (b.hi - b.lo + 1); }
+  function regionWeights(list) {
+    var w = {}, tot = 0; for (var rk in REGION_W) tot += REGION_W[rk]; var other = Math.max(0, 1 - tot);
+    list.forEach(function (c) { if (!c) return; (c.adsets || []).forEach(function (as) {
+      var aud = asAudience(as); var geo = (aud && aud.controls && aud.controls.geo) || 'global';
+      var reach = Math.max(1, audienceEstimate(aud).reach);
+      if (geo === 'global') { for (var k in REGION_W) w[k] = (w[k] || 0) + reach * REGION_W[k]; w.other = (w.other || 0) + reach * other; }
+      else { w[geo] = (w[geo] || 0) + reach; }
+    }); });
+    return w;
+  }
+  function distribute(t, segs) {
+    var W = segs.reduce(function (a, s) { return a + s.w; }, 0) || 1;
+    var CW = segs.reduce(function (a, s) { return a + s.w * (s.ctr || 1); }, 0) || 1;
+    return segs.filter(function (s) { return s.w > 0; }).map(function (s) {
+      var iw = s.w / W, cw = (s.w * (s.ctr || 1)) / CW;
+      var imp = Math.round(t.imp * iw), clk = Math.round(t.clk * cw);
+      return { label: s.label, imp: imp, clk: clk, spend: t.spend * iw, conv: t.conv * cw, ctr: imp ? clk / imp : 0 };
+    });
+  }
+  function breakdownRows(list, dim) {
+    if (dim === 'placement') {
+      var pb = {};
+      list.forEach(function (c) { if (!c) return; (c.adsets || []).forEach(function (as) { (as.ads || []).forEach(function (ad) { for (var k in (ad.placements || {})) { pb[k] = pb[k] || { imp: 0, clk: 0 }; pb[k].imp += ad.placements[k].imp; pb[k].clk += ad.placements[k].clk; } }); }); });
+      var rows = []; PLACEMENTS.forEach(function (p) { if (pb[p.key]) { var x = pb[p.key]; rows.push({ label: p.label, imp: x.imp, clk: x.clk, ctr: x.imp ? x.clk / x.imp : 0, conv: null }); } });
+      return rows;
+    }
+    var t = adjTotals(list), segs;
+    if (dim === 'age') { var floor = minAgeFloor(list); segs = AGE_BRACKETS.map(function (b) { return { label: b.key, w: b.w * bracketFrac(b, floor), ctr: b.ctr }; }); }
+    else if (dim === 'device') { segs = DEVICES.map(function (d) { return { label: d.label, w: d.w, ctr: d.ctr }; }); }
+    else if (dim === 'region') { var rw = regionWeights(list); segs = Object.keys(rw).map(function (k) { return { label: REGION_LABEL[k] || k, w: rw[k], ctr: 1 }; }); segs.sort(function (a, b) { return b.w - a.w; }); }
+    else return [];
+    return distribute(t, segs);
+  }
+
+  // ---- Meta-style learning phase (deterministic from delivered volume) -----
+  function learningPhase(camp) {
+    var obj = OBJECTIVES[camp.objective] || OBJECTIVES.traffic;
+    var t = campTotals(camp), am = attMult();
+    var isConv = obj.value > 0;
+    var need = isConv ? 50 : 500, have = isConv ? t.conv * am : t.clk;
+    var reach = 0; (camp.adsets || []).forEach(function (as) { reach += audienceEstimate(asAudience(as)).reach; });
+    if (have >= need) return { phase: 'Active', pct: 100, color: '#8fbf7f', note: 'Exited learning · stable, optimized delivery' };
+    var pct = Math.max(0, Math.min(99, Math.round(have / need * 100)));
+    if ((reach < 8000 || (camp.budget || 0) < 100) && have < need * 0.5) return { phase: 'Learning Limited', pct: pct, color: '#e0a05e', note: 'Too little audience/budget to exit learning — broaden targeting or raise budget' };
+    return { phase: 'Learning', pct: pct, color: '#c5a46e', note: Math.max(1, Math.round(need - have)) + ' more ' + (isConv ? 'conversions' : 'clicks') + ' to exit the learning phase' };
+  }
+  window.amTrend = function (k) { UI.trendMetric = k; saveU(); window.showDashboard(); };
+  window.amBreakdown = function (d) { UI.breakdown = d; saveU(); window.showDashboard(); };
+
   // ======================= toast ============================================
   function toast(msg) {
     var t = document.getElementById('am-toast') || (function () { var d = document.createElement('div'); d.id = 'am-toast'; d.className = 'am-toast'; document.body.appendChild(d); return d; })();
@@ -767,9 +957,28 @@
       ]
     };
     CAMPAIGNS.push(c);
-    deliverCampaign(c, 380); // pre-populate with real delivered data so dashboard isn't empty
+    simulateWeek(c); // pre-populate a week of real delivered data so the trend chart opens meaningful
     saveC();
   }
+  // Run the delivery engine several times and spread the recorded history over
+  // the past week, so the time-series trend opens with real, multi-day data.
+  // Numbers come straight from the delivery engine; only the timestamps are
+  // spread (clearly-labeled fictional sandbox backfill). Deterministic.
+  function simulateWeek(c) {
+    clearMetrics(c);
+    for (var d = 0; d < 7; d++) deliverCampaign(c, 90 + d * 14);
+    var DAY = 86400000, now = Date.now();
+    (c.adsets || []).forEach(function (as) { (as.ads || []).forEach(function (ad) { var H = ad.history || []; H.forEach(function (hh, i) { hh.ts = now - (H.length - 1 - i) * DAY; }); }); });
+  }
+  function backfillDemoTrend() {
+    try { if (localStorage.getItem('p16_trend_backfill')) return; } catch (e) {}
+    var c = byId('c-demo1');
+    if (c) {
+      var rich = (c.adsets || []).some(function (as) { return (as.ads || []).some(function (ad) { return (ad.history || []).length >= 4; }); });
+      if (!rich) { simulateWeek(c); saveC(); }
+    }
+    try { localStorage.setItem('p16_trend_backfill', '1'); } catch (e) {}
+  }
 
-  window.AdManager = { init: function () { seed(); }, deliverCampaign: deliverCampaign, opportunityScore: opportunityScore, audienceEstimate: audienceEstimate, _state: function () { return { CAMPAIGNS: CAMPAIGNS, AUDIENCES: AUDIENCES, EXPERIMENTS: EXPERIMENTS }; } };
+  window.AdManager = { init: function () { seed(); backfillDemoTrend(); }, deliverCampaign: deliverCampaign, opportunityScore: opportunityScore, audienceEstimate: audienceEstimate, learningPhase: learningPhase, trendSeries: trendSeries, breakdownRows: breakdownRows, _state: function () { return { CAMPAIGNS: CAMPAIGNS, AUDIENCES: AUDIENCES, EXPERIMENTS: EXPERIMENTS }; } };
 })();
